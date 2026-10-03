@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 240">
+  <defs>
+    <filter id="g" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="640" height="240" fill="#04060d"/>
+  <g transform="translate(40 20) scale(.87)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g stroke="#5b8cff" stroke-width="7" filter="url(#g)">
+      <rect x="65" y="12" width="75" height="196" rx="37.5"/>
+      <path d="M70 12H35V208M35 95H66L28 208M128 196L150 216"/>
+    </g>
+    <g stroke="#e6edff" stroke-width="2.4">
+      <rect x="65" y="12" width="75" height="196" rx="37.5"/>
+      <path d="M70 12H35V208M35 95H66L28 208M128 196L150 216"/>
+    </g>
+    <rect x="60" y="90" width="10" height="10" transform="rotate(45 65 95)" fill="#e6edff"/>
+  </g>
+  <line x1="214" y1="64" x2="214" y2="176" stroke="#3d7bff" stroke-opacity=".5" stroke-width="1.5"/>
+  <text x="246" y="134" fill="#e6edff" font-family="JetBrains Mono, Consolas, monospace" font-size="46" font-weight="600" letter-spacing="10">REQUINKI</text>
+  <text x="248" y="168" fill="#7d89ad" font-family="JetBrains Mono, Consolas, monospace" font-size="15" letter-spacing="3">//motion · roblox · bots</text>
+</svg>

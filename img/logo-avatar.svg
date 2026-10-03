@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="45%" r="65%">
+      <stop offset="0" stop-color="#0d1838"/><stop offset="1" stop-color="#04060d"/>
+    </radialGradient>
+    <filter id="g" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="196" fill="none" stroke="#3d7bff" stroke-width="4" filter="url(#g)"/>
+  <circle cx="256" cy="256" r="214" fill="none" stroke="#7fa8ff" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="3 9"/>
+  <g transform="translate(176 141)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g stroke="#5b8cff" stroke-width="7" filter="url(#g)">
+      <rect x="65" y="12" width="75" height="196" rx="37.5"/>
+      <path d="M70 12H35V208M35 95H66L28 208M128 196L150 216"/>
+    </g>
+    <g stroke="#e6edff" stroke-width="2.4">
+      <rect x="65" y="12" width="75" height="196" rx="37.5"/>
+      <path d="M70 12H35V208M35 95H66L28 208M128 196L150 216"/>
+    </g>
+    <rect x="60" y="90" width="10" height="10" transform="rotate(45 65 95)" fill="#e6edff"/>
+  </g>
+</svg>
