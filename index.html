@@ -217,7 +217,7 @@
       <label for="f-service">Что нужно</label>
       <select id="f-service"></select>
 
-      <label for="f-task">Опиши задачу</label>
+      <label for="f-task">Опишите задачу</label>
       <textarea id="f-task" placeholder="Например: превью для симулятора, стиль как у ..., нужно к пятнице"></textarea>
 
       <label for="f-budget">Бюджет (необязательно)</label>
@@ -316,7 +316,7 @@ const WORKS = [
     desc: "Монограмма для псевдонима REquinki по моему эскизу." },
 ];
 
-const ABOUT = "Привет! Я Ника, работаю под псевдонимом REquinki. Делаю моушн-дизайн в After Effects, графику для Roblox-игр и Telegram-ботов на Python. Люблю, когда вещь не только красиво выглядит, но и понятно устроена.";
+const ABOUT = "Здравствуйте! Я Ника, работаю под псевдонимом REquinki. Делаю моушн-дизайн в After Effects, графику для Roblox-игр и Telegram-ботов на Python. Люблю, когда вещь не только красиво выглядит, но и понятно устроена.";
 
 const LINKS = [
   ["Kwork", "https://kwork.ru/", "kwork"],
@@ -390,7 +390,7 @@ function sendOrder() {
     budget: document.getElementById("f-budget").value.trim(),
     deadline: document.getElementById("f-deadline").value.trim(),
   };
-  if (data.task.length < 10) { err.textContent = "Опиши задачу хотя бы парой предложений."; return; }
+  if (data.task.length < 10) { err.textContent = "Опишите задачу хотя бы парой предложений."; return; }
   err.textContent = "";
 
   // sendData работает, только если приложение открыто кнопкой под полем ввода в чате с ботом
@@ -401,7 +401,7 @@ function sendOrder() {
     return;
   }
   if (tg && tg.platform !== "unknown") {
-    err.textContent = "Открой приложение кнопкой «✨ Открыть» внизу чата с ботом — тогда заявка дойдёт.";
+    err.textContent = "Откройте приложение кнопкой «✨ Открыть» внизу чата с ботом, тогда заявка дойдёт.";
     return;
   }
   // открыто в обычном браузере — просто показываем, как это выглядит
