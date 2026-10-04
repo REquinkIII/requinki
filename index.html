@@ -126,8 +126,15 @@
     font-family: var(--mono); font-size: 11px; color: var(--muted);
     background: radial-gradient(circle, rgba(61,123,255,.18), transparent 70%);
   }
-  .work .ph.demo { font-size: 13px; color: var(--neon2); text-shadow: 0 0 10px rgba(61,123,255,.8); }
-  .work .ph.demo::first-line { font-size: 30px; }
+  .demo-badge {
+    position: absolute; top: 8px; right: 8px; font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
+    background: rgba(4,6,13,.85); color: var(--neon2); border: 1px solid var(--neon); border-radius: 99px;
+    padding: 3px 8px; box-shadow: 0 0 10px rgba(61,123,255,.6);
+  }
+  .work .thumb img { object-position: top; }
+  .gal { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; }
+  .gal img { flex: 0 0 78%; width: 78%; scroll-snap-align: center; }
+  .gal-hint { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: right; margin-top: 4px; }
   .work .cap { padding: 8px 10px; font-size: 13px; }
   .work .cap small { display: block; color: var(--muted); font-family: var(--mono); font-size: 10px; }
   .modal {
@@ -312,7 +319,8 @@ const SERVICES = [
 const WORKS = [
   { title: "Аватарка для TikTok", tag: "позинг", img: "img/avatar.jpg",
     desc: "Позинг: персонаж поставлен в позу в Blender, потом обработан и собран в единую композицию: неон, плёнка, глитч." },
-  { title: "Бот-анкета для сообщества", tag: "telegram-бот · демо", img: "", demo: "demo-anketa.html",
+  { title: "Бот-анкета для сообщества", tag: "telegram-бот · демо", img: "img/anketa-4.jpg", demo: "demo-anketa.html",
+    imgs: ["img/anketa-1.jpg", "img/anketa-2.jpg", "img/anketa-3.jpg", "img/anketa-4.jpg", "img/anketa-5.jpg"],
     desc: "Принимает анкеты, сам проверяет их по правилам и отклоняет слишком короткие с объяснением причины. Подходящие пересылает администраторам, а их ответы возвращает игроку. Работает в настоящем игровом сообществе несколько месяцев. В демо имена и названия заменены." },
   { title: "Это мини-приложение", tag: "telegram mini app", img: "",
     desc: "Бот с приложением внутри: услуги, работы и форма заявки, которая приходит прямо в Telegram." },
@@ -351,19 +359,19 @@ sel.innerHTML = SERVICES.flatMap(g => g.items.map(([n]) => `<option>${esc(g.grou
 
 // портфолио
 function media(w, big) {
+  if (big && w.imgs) return `<div class="gal">${w.imgs.map(u => `<img src="${esc(u)}" alt="" loading="lazy">`).join("")}</div><div class="gal-hint">листайте →</div>`;
   if (w.video) return `<video src="${esc(w.video)}" ${big ? "controls autoplay" : "muted autoplay loop"} playsinline></video>`;
   if (w.img) return `<img src="${esc(w.img)}" alt="" loading="lazy">`;
-  if (w.demo) return `<div class="ph demo">▶<br>попробовать</div>`;
   return `<div class="ph">// скоро<br>${esc(w.tag)}</div>`;
 }
 document.getElementById("works").innerHTML = WORKS.map((w, i) => `
   <div class="work" onclick="openWork(${i})">
-    <div class="thumb">${media(w, false)}</div>
+    <div class="thumb">${media(w, false)}${w.demo ? `<span class="demo-badge">▶ демо</span>` : ""}</div>
     <div class="cap">${esc(w.title)}<small>${esc(w.tag)}</small></div>
   </div>`).join("");
 function openWork(i) {
   const w = WORKS[i]; haptic();
-  document.getElementById("m-media").innerHTML = (w.img || w.video) ? media(w, true) : "";
+  document.getElementById("m-media").innerHTML = (w.imgs || w.img || w.video) ? media(w, true) : "";
   document.getElementById("m-title").textContent = w.title;
   document.getElementById("m-desc").textContent = w.desc;
   const d = document.getElementById("m-demo");
