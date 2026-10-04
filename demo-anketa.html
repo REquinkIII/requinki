@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Демо: бот-анкета</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #04060d; --panel: #070b1a; --line: rgba(80,130,255,.22);
+    --neon: #3d7bff; --neon2: #7fa8ff; --text: #dfe6ff; --muted: #7d89ad;
+    --in: #101a3a; --out: #2a56c9; --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg); color: var(--text); font: 14px/1.45 Inter, system-ui, sans-serif;
+    display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden;
+    background-image:
+      linear-gradient(rgba(80,130,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(80,130,255,.04) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+  header {
+    flex: none; padding: 10px 14px 0; border-bottom: 1px solid var(--line);
+    background: rgba(4,6,13,.92); backdrop-filter: blur(8px);
+  }
+  .top { display: flex; align-items: center; gap: 10px; }
+  .back {
+    background: none; border: 1px solid var(--line); color: var(--neon2); border-radius: 10px;
+    width: 34px; height: 34px; font-size: 18px; cursor: pointer; flex: none;
+  }
+  .title b { display: block; font-size: 15px; }
+  .title small { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .06em; }
+  .tabs { display: flex; gap: 6px; margin-top: 10px; }
+  .tabs button {
+    flex: 1; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted);
+    font: 600 13px Inter, sans-serif; padding: 8px 0 9px; cursor: pointer; position: relative;
+  }
+  .tabs button.on { color: var(--neon2); border-color: var(--neon); }
+  .badge {
+    display: none; position: absolute; top: 4px; margin-left: 4px; min-width: 16px; height: 16px; padding: 0 4px;
+    border-radius: 8px; background: #ff3d6e; color: #fff; font-size: 10px; line-height: 16px;
+  }
+  .badge.on { display: inline-block; }
+
+  .chat { flex: 1; overflow-y: auto; padding: 14px 12px 8px; display: none; }
+  .chat.on { display: block; }
+  .hint {
+    font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: center;
+    border: 1px dashed var(--line); border-radius: 10px; padding: 8px 10px; margin: 0 4px 14px;
+  }
+  .msg { max-width: 86%; margin: 0 0 8px; display: flex; flex-direction: column; }
+  .msg.out { margin-left: auto; align-items: flex-end; }
+  .bubble {
+    background: var(--in); border: 1px solid var(--line); border-radius: 14px 14px 14px 4px;
+    padding: 8px 11px; white-space: pre-wrap; word-wrap: break-word;
+  }
+  .msg.out .bubble { background: var(--out); border-color: transparent; border-radius: 14px 14px 4px 14px; color: #fff; }
+  .who { font-size: 12px; font-weight: 600; color: var(--neon2); margin-bottom: 2px; }
+  .kb { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; width: 100%; }
+  .kb button {
+    background: rgba(61,123,255,.16); color: var(--text); border: 1px solid var(--line); border-radius: 10px;
+    padding: 8px; font: 500 13px Inter, sans-serif; cursor: pointer;
+  }
+  .kb button:active { background: rgba(61,123,255,.35); }
+  .reply-btn {
+    align-self: flex-start; margin-top: 4px; background: none; border: 1px solid var(--neon); color: var(--neon2);
+    border-radius: 8px; padding: 4px 10px; font: 500 12px Inter, sans-serif; cursor: pointer;
+  }
+  .flash .bubble { animation: flash 1.2s ease; }
+  @keyframes flash { 0% { box-shadow: 0 0 0 0 rgba(61,123,255,.0); } 30% { box-shadow: 0 0 18px 2px rgba(61,123,255,.7); } 100% { box-shadow: none; } }
+
+  footer {
+    flex: none; border-top: 1px solid var(--line); background: rgba(4,6,13,.95);
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  }
+  .chips { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 8px; }
+  .chips:empty { display: none; }
+  .chips button {
+    flex: none; background: none; border: 1px solid var(--line); color: var(--neon2); border-radius: 99px;
+    padding: 5px 11px; font: 500 12px Inter, sans-serif; cursor: pointer;
+  }
+  .replying { display: none; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+  .replying.on { display: flex; justify-content: space-between; }
+  .replying b { color: var(--neon2); font-weight: 600; }
+  .replying button { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 14px; }
+  .bar { display: flex; gap: 8px; align-items: flex-end; }
+  textarea {
+    flex: 1; resize: none; max-height: 110px; min-height: 40px; background: var(--panel); color: var(--text);
+    border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px; font: inherit; outline: none;
+  }
+  textarea:focus { border-color: var(--neon); }
+  .send {
+    flex: none; width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--neon); color: #fff;
+    font-size: 17px; cursor: pointer; box-shadow: 0 0 12px rgba(61,123,255,.6);
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <button class="back" onclick="goBack()" aria-label="Назад">‹</button>
+    <div class="title"><b>Бот-анкета · демо</b><small>// клан «Полночь» · имена выдуманы</small></div>
+  </div>
+  <div class="tabs">
+    <button id="t-user" class="on" onclick="tab('user')">Глазами игрока<span class="badge" id="b-user"></span></button>
+    <button id="t-admin" onclick="tab('admin')">Админ-чат<span class="badge" id="b-admin"></span></button>
+  </div>
+</header>
+
+<div class="chat on" id="c-user">
+  <div class="hint">Это копия настоящего бота. Понажимайте кнопки, отправьте анкету, потом загляните в «Админ-чат».</div>
+</div>
+<div class="chat" id="c-admin">
+  <div class="hint">Чат администрации. Сюда бот пересылает анкеты и сообщения. Нажмите «Ответить», и ответ уйдёт игроку от имени бота.</div>
+</div>
+
+<footer>
+  <div class="chips" id="chips"></div>
+  <div class="replying" id="replying"><span>Ответ для <b id="r-name"></b></span><button onclick="cancelReply()">✕</button></div>
+  <div class="bar">
+    <textarea id="input" rows="1" placeholder="Сообщение"></textarea>
+    <button class="send" onclick="send()" aria-label="Отправить">➤</button>
+  </div>
+</footer>
+
+<script>
+/* ---------- тексты бота (по мотивам настоящего, имена заменены) ---------- */
+const START_TEXT = `❮ Привет-привет! На связи Луна, глава клана «Полночь». Рада видеть тебя в нашем уютном уголке! ❯
+
+✶ Мы строим не просто клан, а место с тёплой атмосферой. Нам важны не цифры, а комфорт каждого.
+
+✶ Чего мы ждём? ✶
+  ~ Активности и позитива.
+  ~ Искреннего интереса к жизни клана.
+  ~ Общения без токсичности.`;
+
+const SECTIONS = {
+  anketa: ["📋 Анкета", `Анкета — это ваше «лицо» и первый шаг к знакомству.
+
+ВАЖНО: кратким анкетам будет отказано. Заполняйте пункты подробно.
+
+ШАБЛОН АНКЕТЫ
+❯❯ Имя или псевдоним:
+❯❯ Ник в игре:
+❯❯ Ник в Roblox:
+❯❯ Возраст (16+):
+❯❯ Часовой пояс:
+❯❯ Уровень в игре (от 50):
+❯❯ Опыт (в каких кланах были):
+❯❯ Discord и микрофон:
+❯❯ Мотивация: почему именно мы?
+❯❯ О себе:
+
+— — —
+📎 Заполни и пришли сюда следующим сообщением. Можно несколькими сообщениями. Когда всё отправишь — напиши /done.`],
+  rules: ["📖 Правила", `❯❯ возрастное ограничение 16+;
+❯❯ норма в неделю: 150 сообщений;
+❯❯ чистка каждое воскресенье в 20:00 МСК;
+❯❯ неактив максимум 3 дня;
+❯❯ съёмки проходят в Discord;
+❯❯ краткие анкеты не рассматриваются.`],
+  admin: ["👑 Администрация", `◆◆ Луна — владелец ◆◆
+→ принятие людей в клан;
+→ проведение съёмок и чисток.
+
+◆◆ Ёж — совладелец ◆◆
+→ слежка за правилами в чате;
+→ помощь новым участникам.
+
+◇ Сова — монтажёр ◇
+→ 3D-работы и монтаж видео.`],
+  schedule: ["🎬 Расписание съёмок", `❯ Понедельник: отдых
+❯❯❯ Среда: 19:00 МСК
+❯ Пятница: отдых
+❯❯❯ Суббота: 19:00 МСК
+
+Возможны переносы, о них сообщим заранее.`],
+};
+
+const GOOD_ANKETA = `1. Тень
+2. shadow_fox
+3. ShadowFox_RBX
+4. 17
+5. +1 к МСК
+6. 74
+7. Полгода была в небольшом клане, но он распался, и с тех пор ищу новое место
+8. Discord есть, микрофон тоже, могу ходить на съёмки по средам и субботам
+9. Понравилась атмосфера в канале и то, что вы не гонитесь за количеством людей
+10. Люблю рисовать и монтировать короткие видео, в Evade играю почти каждый вечер, обычно после учёбы с друзьями`;
+
+const BAD_ANKETA = `тень
+17
+74
+хочу к вам`;
+
+/* ---------- проверка анкеты: та же логика, что в боте ---------- */
+const MIN_CHARS = 400, MIN_LINES = 8, MIN_LONG = 2, LONG_CHARS = 40;
+const PREFIX = /^\s*(?:\d+\s*[.)]|[❯>\-–—•*]+)\s*/;
+
+function stats(text) {
+  const answers = text.split("\n").map(l => l.trim()).filter(Boolean)
+    .map(l => l.replace(PREFIX, "").trim()).filter(Boolean);
+  return {
+    chars: text.replace(/\s+/g, " ").trim().length,
+    lines: answers.length,
+    long: answers.filter(a => a.length >= LONG_CHARS).length,
+  };
+}
+function plural(n) {
+  const t = n % 10, h = n % 100;
+  return (t === 1 && h !== 11) ? "пункт" : (t >= 2 && t <= 4 && !(h >= 12 && h <= 14)) ? "пункта" : "пунктов";
+}
+function problems(st) {
+  const out = [];
+  if (st.chars < MIN_CHARS) out.push(`объём ${st.chars} символов вместо ${MIN_CHARS}`);
+  if (st.lines < MIN_LINES) out.push(`заполнено ${st.lines} ${plural(st.lines)} из 10`);
+  if (st.long < MIN_LONG) out.push("ответы в одно-два слова — нужны развёрнутые (особенно «Опыт», «Мотивация» и «О себе»)");
+  return out;
+}
+const rejectText = (p) => `❌ Анкета не соответствует требованиям.
+
+Что не так:
+— ${p.join("\n— ")}
+
+Пункты «Опыт», «Мотивация» и «О себе» нужно расписать предложениями — именно по ним вас и оценивают.
+
+Перепишите и пришлите заново. Если ещё не дописали — просто продолжайте, я посчитаю всё вместе.`;
+
+/* ---------- чат ---------- */
+const tg = window.Telegram ? window.Telegram.WebApp : null;
+if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor("#04060d"); tg.setBackgroundColor("#04060d"); tg.BackButton.show(); tg.BackButton.onClick(goBack); } catch (e) {} }
+function goBack() { location.href = "index.html#works"; }
+const tap = () => { try { tg && tg.HapticFeedback.impactOccurred("light"); } catch (e) {} };
+
+const PLAYER = "Тень", PLAYER_TAG = "@shadow_fox · id 5803117429";
+let current = "user", collecting = false, anketa = "", replyTo = null, menuMsg = null, msgSeq = 0;
+
+const el = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function add(chatId, { text, out = false, who = "", kb = null, replyable = false, flash = false }) {
+  const c = el("c-" + chatId);
+  const m = document.createElement("div");
+  m.className = "msg" + (out ? " out" : "") + (flash ? " flash" : "");
+  m.id = "m" + (++msgSeq);
+  m.innerHTML = `<div class="bubble">${who ? `<div class="who">${esc(who)}</div>` : ""}<span class="t">${esc(text)}</span></div>`;
+  if (kb) setKb(m, kb);
+  if (replyable) {
+    const b = document.createElement("button");
+    b.className = "reply-btn"; b.textContent = "↩ Ответить";
+    b.onclick = () => startReply();
+    m.appendChild(b);
+  }
+  c.appendChild(m);
+  if (chatId !== current) { const bd = el("b-" + chatId); bd.textContent = (+bd.textContent || 0) + 1; bd.classList.add("on"); }
+  setTimeout(() => c.scrollTo({ top: c.scrollHeight, behavior: "smooth" }), 30);
+  return m;
+}
+function setKb(m, kb) {
+  m.querySelector(".kb")?.remove();
+  if (!kb) return;
+  const box = document.createElement("div"); box.className = "kb";
+  kb.forEach(([label, fn]) => { const b = document.createElement("button"); b.textContent = label; b.onclick = () => { tap(); fn(); }; box.appendChild(b); });
+  m.appendChild(box);
+}
+function editMsg(m, text, kb) { m.querySelector(".t").textContent = text; setKb(m, kb); }
+
+const menuKb = () => Object.entries(SECTIONS).map(([k, [label]]) => [label, () => openSection(k)]);
+const backKb = () => [["🔙 Меню", () => editMsg(menuMsg, "Выбери раздел:", menuKb())]];
+
+function openSection(key) {
+  if (key === "anketa") { collecting = true; anketa = ""; }
+  editMsg(menuMsg, SECTIONS[key][1], backKb());
+  chips();
+}
+
+function botSay(text, kb) { return new Promise(r => setTimeout(() => r(add("user", { text, kb })), 450)); }
+
+function chips() {
+  const c = el("chips"); c.innerHTML = "";
+  const list = current === "user"
+    ? (collecting ? [["Вставить хорошую анкету", GOOD_ANKETA], ["Вставить короткую", BAD_ANKETA], ["/done", "/done"]] : [["/start", "/start"]])
+    : [];
+  list.forEach(([label, val]) => {
+    const b = document.createElement("button"); b.textContent = label;
+    b.onclick = () => { el("input").value = val; autosize(); el("input").focus(); };
+    c.appendChild(b);
+  });
+}
+
+async function userSend(text) {
+  add("user", { text, out: true });
+  if (text === "/start") {
+    collecting = false; chips();
+    await botSay(START_TEXT);
+    menuMsg = await botSay("Выбери раздел:", menuKb());
+    return;
+  }
+  if (text === "/done") {
+    if (!collecting) { await botSay("Ты сейчас не заполняешь анкету — нажми «📋 Анкета» в меню, чтобы начать."); return; }
+    collecting = false; chips();
+    const st = stats(anketa), p = problems(st);
+    anketa = "";
+    await botSay(p.length ? rejectText(p) : "Приём анкеты завершён, спасибо! Ожидай ответа администрации.");
+    return;
+  }
+  const isAnketa = collecting;
+  let header = `${isAnketa ? "📋 Новая анкета" : "💬 Сообщение"}\nОт: ${PLAYER} (${PLAYER_TAG})`;
+  let p = [];
+  if (isAnketa) {
+    anketa = (anketa + "\n" + text).trim();
+    const st = stats(anketa); p = problems(st);
+    header += p.length
+      ? `\n⚠️ Анкета не прошла, человека уведомил (${st.chars} симв., ${st.lines} пунктов, развёрнутых ответов ${st.long})`
+      : `\n✅ Анкета прошла проверку (${st.chars} симв., ${st.lines} пунктов, развёрнутых ответов ${st.long})`;
+  }
+  setTimeout(() => {
+    add("admin", { text: header, who: "Бот-анкета", replyable: true, flash: true });
+    add("admin", { text, who: "Бот-анкета · переслано", replyable: true });
+  }, 300);
+  if (isAnketa) await botSay(p.length ? rejectText(p) : "Принято! Если это не всё — пришли ещё сообщением, а как закончишь — напиши /done.");
+  else await botSay("Сообщение передано администрации.");
+}
+
+function startReply() {
+  tap(); replyTo = PLAYER;
+  el("r-name").textContent = PLAYER; el("replying").classList.add("on");
+  el("input").placeholder = "Ответ игроку"; el("input").focus();
+}
+function cancelReply() { replyTo = null; el("replying").classList.remove("on"); el("input").placeholder = "Сообщение"; }
+
+function adminSend(text) {
+  if (!replyTo) {
+    add("admin", { text, out: true });
+    setTimeout(() => add("admin", { text: "(обычное сообщение в чате админов — бот его не трогает. Чтобы ответить игроку, нажмите «↩ Ответить» на анкете.)", who: "подсказка" }), 300);
+    return;
+  }
+  add("admin", { text, out: true, who: "Луна" });
+  cancelReply();
+  setTimeout(() => {
+    add("user", { text: "✉️ Ответ от администрации:" });
+    add("user", { text, flash: true });
+  }, 400);
+}
+
+function send() {
+  const i = el("input"), text = i.value.trim();
+  if (!text) return;
+  tap(); i.value = ""; autosize();
+  current === "user" ? userSend(text) : adminSend(text);
+}
+
+function tab(t) {
+  current = t; tap();
+  ["user", "admin"].forEach(x => { el("t-" + x).classList.toggle("on", x === t); el("c-" + x).classList.toggle("on", x === t); });
+  const bd = el("b-" + t); bd.textContent = ""; bd.classList.remove("on");
+  if (t === "user") cancelReply();
+  el("input").placeholder = t === "user" ? "Сообщение" : "Сообщение в чат админов";
+  chips();
+  const c = el("c-" + t); c.scrollTop = c.scrollHeight;
+}
+
+function autosize() { const i = el("input"); i.style.height = "auto"; i.style.height = Math.min(i.scrollHeight, 110) + "px"; }
+el("input").addEventListener("input", autosize);
+el("input").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && !("ontouchstart" in window)) { e.preventDefault(); send(); } });
+
+userSend("/start");
+</script>
+</body>
+</html>

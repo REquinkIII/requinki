@@ -126,6 +126,8 @@
     font-family: var(--mono); font-size: 11px; color: var(--muted);
     background: radial-gradient(circle, rgba(61,123,255,.18), transparent 70%);
   }
+  .work .ph.demo { font-size: 13px; color: var(--neon2); text-shadow: 0 0 10px rgba(61,123,255,.8); }
+  .work .ph.demo::first-line { font-size: 30px; }
   .work .cap { padding: 8px 10px; font-size: 13px; }
   .work .cap small { display: block; color: var(--muted); font-family: var(--mono); font-size: 10px; }
   .modal {
@@ -251,6 +253,7 @@
     <div id="m-media"></div>
     <h3 id="m-title"></h3>
     <p id="m-desc"></p>
+    <button class="btn" id="m-demo" style="display:none">▶ Попробовать демо</button>
     <button class="btn ghost" onclick="closeWork()">Закрыть</button>
   </div>
 </div>
@@ -309,8 +312,8 @@ const SERVICES = [
 const WORKS = [
   { title: "Аватарка для TikTok", tag: "позинг", img: "img/avatar.jpg",
     desc: "Позинг: персонаж поставлен в позу в Blender, потом обработан и собран в единую композицию: неон, плёнка, глитч." },
-  { title: "Бот-анкета для сообщества", tag: "telegram-бот", img: "",
-    desc: "Принимает анкеты, проверяет их по правилам и пересылает администраторам. Работает несколько месяцев." },
+  { title: "Бот-анкета для сообщества", tag: "telegram-бот · демо", img: "", demo: "demo-anketa.html",
+    desc: "Принимает анкеты, сам проверяет их по правилам и отклоняет слишком короткие с объяснением причины. Подходящие пересылает администраторам, а их ответы возвращает игроку. Работает в настоящем игровом сообществе несколько месяцев. В демо имена и названия заменены." },
   { title: "Это мини-приложение", tag: "telegram mini app", img: "",
     desc: "Бот с приложением внутри: услуги, работы и форма заявки, которая приходит прямо в Telegram." },
   { title: "Логотип RQ", tag: "брендинг", img: "img/logo-avatar.svg",
@@ -327,7 +330,7 @@ const LINKS = [
 /* ===================================================== */
 
 const tg = window.Telegram ? window.Telegram.WebApp : null;
-if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor("#04060d"); tg.setBackgroundColor("#04060d"); } catch (e) {} }
+if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor("#04060d"); tg.setBackgroundColor("#04060d"); tg.BackButton.hide(); } catch (e) {} }
 const haptic = (t) => { try { tg && tg.HapticFeedback.selectionChanged(); } catch (e) {} };
 
 const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -350,6 +353,7 @@ sel.innerHTML = SERVICES.flatMap(g => g.items.map(([n]) => `<option>${esc(g.grou
 function media(w, big) {
   if (w.video) return `<video src="${esc(w.video)}" ${big ? "controls autoplay" : "muted autoplay loop"} playsinline></video>`;
   if (w.img) return `<img src="${esc(w.img)}" alt="" loading="lazy">`;
+  if (w.demo) return `<div class="ph demo">▶<br>попробовать</div>`;
   return `<div class="ph">// скоро<br>${esc(w.tag)}</div>`;
 }
 document.getElementById("works").innerHTML = WORKS.map((w, i) => `
@@ -362,6 +366,9 @@ function openWork(i) {
   document.getElementById("m-media").innerHTML = (w.img || w.video) ? media(w, true) : "";
   document.getElementById("m-title").textContent = w.title;
   document.getElementById("m-desc").textContent = w.desc;
+  const d = document.getElementById("m-demo");
+  d.style.display = w.demo ? "block" : "none";
+  d.onclick = () => { location.href = w.demo; };
   document.getElementById("modal").classList.add("on");
 }
 function closeWork() { document.getElementById("modal").classList.remove("on"); document.getElementById("m-media").innerHTML = ""; }
