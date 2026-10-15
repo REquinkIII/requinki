@@ -124,8 +124,8 @@ textarea{min-height:100px;resize:vertical}
 .cat{position:fixed;left:0;bottom:calc(84px + env(safe-area-inset-bottom));width:88px;height:51px;z-index:2;pointer-events:none;animation:run 16s linear infinite}
 .cat svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 3px #ff4fa3) drop-shadow(0 0 9px rgba(255,79,163,.7))}
 .cat path{fill:none;stroke:#ff8fc4;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
-.cat path.head{fill:#1a0a16;stroke:#ff8fc4;stroke-width:2.6}
-.cat .eye{fill:#b07bff;filter:drop-shadow(0 0 3px #b07bff)}
+
+.cat .eye{fill:#ff4fa3;filter:drop-shadow(0 0 2px #ff4fa3) drop-shadow(0 0 5px #ff4fa3)}
 .cat .whisk{stroke-width:1.2;opacity:.8}
 .cat .leg{transform-box:fill-box;transform-origin:top center;animation:step .42s ease-in-out infinite alternate}
 .cat .l2,.cat .l3{animation-direction:alternate-reverse}
@@ -152,7 +152,7 @@ textarea{min-height:100px;resize:vertical}
 </div>
 <div class="cat" id="cat" aria-hidden="true"><svg viewBox="0 0 120 70">
   <path class="tail" d="M22,36 C10,32 6,20 12,12"/>
-  <path d="M22,38 C24,26 40,22 58,24 C74,25 84,26 90,32 C92,40 86,46 76,47 L34,47 C26,47 21,44 22,38Z"/>
+  <path d="M86,37 C84,44 82,47 76,47 L34,47 C26,47 21,44 22,38 C24,26 40,22 58,24 C70,25 79,25 85,27"/>
   <path class="head" d="M84,30 C84,20 90,14 98,14 C106,14 112,20 111,28 C110,35 104,39 97,39 C90,39 85,36 84,30Z"/>
   <path d="M89,18 L90,7 L96,15 M103,15 L108,6 L109,18"/>
   <circle class="eye" cx="101" cy="25" r="1.8"/><circle class="eye" cx="106.5" cy="25" r="1.8"/>
