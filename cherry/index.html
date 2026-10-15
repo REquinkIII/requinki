@@ -71,6 +71,13 @@ a{color:var(--neon2)}
 .day b{display:block;font-size:13px;color:var(--soft)}
 .day.on{border-color:var(--neon);color:#fff;box-shadow:var(--glow);background:rgba(255,79,163,.18)}
 .day.on b{color:#fff}
+.day.purge{border-color:var(--violet);color:#fff;box-shadow:0 0 12px rgba(176,123,255,.6),0 0 28px rgba(176,123,255,.25);background:rgba(176,123,255,.16)}
+.day.purge b{color:#fff}
+.legend{font-family:var(--mono);font-size:11px;color:var(--soft);display:flex;align-items:center;gap:6px;margin:-4px 0 8px}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-left:6px}
+.dot:first-child{margin-left:0}
+.dot.on{background:var(--neon);box-shadow:0 0 6px var(--neon)}
+.dot.purge{background:var(--violet);box-shadow:0 0 6px var(--violet)}
 
 /* администрация */
 .admin{display:flex;gap:14px;align-items:flex-start}
@@ -226,11 +233,13 @@ const STEPS = [
 
   {type:"read", section:"Съёмки", title:"Расписание съёмок", html:`
     <div class="days">
-      <div class="day"><b>Пн</b>—</div><div class="day"><b>Вт</b>—</div><div class="day on"><b>Ср</b>19:00</div>
-      <div class="day"><b>Чт</b>—</div><div class="day"><b>Пт</b>—</div><div class="day on"><b>Сб</b>19:00</div><div class="day"><b>Вс</b>—</div>
+      <div class="day"><b>Пн</b>—</div><div class="day on"><b>Вт</b>19:00</div><div class="day"><b>Ср</b>—</div>
+      <div class="day"><b>Чт</b>—</div><div class="day"><b>Пт</b>—</div><div class="day on"><b>Сб</b>19:00</div><div class="day purge"><b>Вс</b>20:00</div>
     </div>
+    <p class="legend"><span class="dot on"></span>съёмки <span class="dot purge"></span>чистка</p>
     <ul>
-      <li>Съёмки: <b>среда и суббота в 19:00</b>. Остальные дни — отдых.</li>
+      <li>Съёмки: <b>вторник и суббота в 19:00</b>. Остальные дни — отдых.</li>
+      <li>Чистка: <b>воскресенье в 20:00</b>.</li>
       <li>Время всегда <b>московское</b>.</li>
       <li>Возможны переносы, о них сообщим заранее.</li>
       <li>Убедись, что тебе подходит это время, <b>до</b> вступления в клан.</li>
@@ -260,7 +269,7 @@ const STEPS = [
       <li><b>Реклама</b> сторонних серверов и услуг без согласования — предупреждение. <b>Взлом, фишинг и вредоносные ссылки</b> — немедленное удаление.</li>
     </ul>`},
   {type:"quiz", section:"Съёмки", pick:3, pool:[
-    {q:"В какие дни проходят съёмки?", a:["Среда и суббота, 19:00 по МСК","Каждый день в 19:00","Пятница и воскресенье, 20:00"]},
+    {q:"В какие дни проходят съёмки?", a:["Вторник и суббота, 19:00 по МСК","Среда и суббота, 19:00 по МСК","Пятница и воскресенье, 20:00"]},
     {q:"Ты отметился, что придёшь на съёмки. Когда нужно быть на месте?", a:["За 10 минут до начала","Ровно к началу","Можно опоздать на полчаса"]},
     {q:"Что делать, когда говорит ведущий?", a:["Молчать и не перебивать","Сразу отвечать","Обсуждать его слова с соседом"]},
     {q:"Что нельзя делать с включённым микрофоном на съёмке?", a:["Есть, шуршать и кликать мышкой","Отвечать ведущему","Говорить по плану"]},
