@@ -17,7 +17,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0}
 body{background:var(--bg);color:var(--ink);font:15.5px/1.6 Inter,system-ui,sans-serif;min-height:100vh;overflow-x:hidden}
-.wrap{max-width:560px;margin:0 auto;padding:0 16px 170px;position:relative;z-index:1}
+.wrap{max-width:560px;margin:0 auto;padding:0 16px 150px;position:relative;z-index:1}
 
 /* фон: свечение, большие неоновые цветки, падающие лепестки */
 .bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
@@ -114,32 +114,48 @@ textarea{min-height:100px;resize:vertical}
 .check input{width:20px;height:20px;accent-color:var(--neon)}
 
 /* нижняя кнопка */
-.foot{position:fixed;left:0;right:0;bottom:0;z-index:6;background:linear-gradient(to top,var(--bg) calc(100% - 16px),transparent);padding:82px 16px calc(14px + env(safe-area-inset-bottom))}
+.foot{position:fixed;left:0;right:0;bottom:0;z-index:6;background:linear-gradient(to top,var(--bg) 65%,transparent);padding:20px 16px calc(14px + env(safe-area-inset-bottom))}
 .foot .in{max-width:560px;margin:0 auto;display:flex;gap:10px}
 .btn{flex:1;border:0;border-radius:12px;padding:15px;font:600 15.5px Inter,sans-serif;background:var(--neon);color:#fff;cursor:pointer;box-shadow:var(--glow);transition:background .2s,box-shadow .2s}
 .btn:active{transform:scale(.98)}
 .btn[disabled]{background:rgba(255,79,163,.16);color:var(--soft);box-shadow:none;cursor:default;font-family:var(--mono);font-size:13px}
 .btn.ghost{flex:0 0 auto;background:transparent;color:var(--neon2);border:1px solid var(--neon);box-shadow:none;padding:15px 18px}
-/* неоновый кот */
-.cat{position:fixed;left:0;bottom:calc(76px + env(safe-area-inset-bottom));width:88px;height:51px;z-index:7;pointer-events:none;animation:run 16s linear infinite}
-.cat svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 3px #ff4fa3) drop-shadow(0 0 9px rgba(255,79,163,.7))}
-.cat path{fill:none;stroke:#ff8fc4;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
-
-.cat .eye{fill:#ff4fa3;filter:drop-shadow(0 0 2px #ff4fa3) drop-shadow(0 0 5px #ff4fa3)}
-.cat .whisk{stroke-width:1.2;opacity:.8}
-.cat .leg{transform-box:fill-box;transform-origin:top center;animation:step .42s ease-in-out infinite alternate}
-.cat .l2,.cat .l3{animation-direction:alternate-reverse}
-.cat .tail{transform-box:fill-box;transform-origin:bottom right;animation:wag .9s ease-in-out infinite alternate}
-@keyframes step{from{transform:rotate(-24deg)}to{transform:rotate(24deg)}}
-@keyframes wag{from{transform:rotate(-14deg)}to{transform:rotate(12deg)}}
-/* бежит вправо, разворачивается, бежит обратно */
-@keyframes run{
-  0%{transform:translateX(-90px) scaleX(1)}
-  48%{transform:translateX(calc(100vw + 10px)) scaleX(1)}
-  50%{transform:translateX(calc(100vw + 10px)) scaleX(-1)}
-  98%{transform:translateX(-90px) scaleX(-1)}
-  100%{transform:translateX(-90px) scaleX(1)}}
-@media (prefers-reduced-motion:reduce){.cat{display:none}}
+/* Черрик — неоновый кот, сидит на краю кнопки и реагирует на ответы */
+.cat{position:fixed;right:max(14px,calc(50% - 266px));bottom:calc(64px + env(safe-area-inset-bottom));width:54px;height:62px;z-index:7;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.cat svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 2.5px #ff4fa3) drop-shadow(0 0 8px rgba(255,79,163,.7))}
+.cat path,.cat line{fill:none;stroke:#ff8fc4;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.cat .eyes circle{fill:#ff4fa3;stroke:none;filter:drop-shadow(0 0 2px #ff4fa3) drop-shadow(0 0 5px #ff4fa3)}
+.cat .whisk{stroke-width:1.1;opacity:.8}
+.cat .body{animation:breathe 3.2s ease-in-out infinite;transform-box:fill-box;transform-origin:bottom center}
+.cat .eyes{transform-box:fill-box;transform-origin:center;animation:blink 4.6s infinite}
+.cat .tail{transform-box:fill-box;transform-origin:0% 100%;animation:swish 2.4s ease-in-out infinite alternate}
+.cat .earL,.cat .earR{transform-box:fill-box;transition:transform .35s}
+.cat .earL{transform-origin:100% 100%}.cat .earR{transform-origin:0% 100%}
+.cat .happyEyes,.cat .sadEyes,.cat .tear{opacity:0;transition:opacity .2s}
+@keyframes breathe{50%{transform:scaleY(1.035)}}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@keyframes swish{from{transform:rotate(-8deg)}to{transform:rotate(14deg)}}
+/* радуется */
+.cat.happy{animation:hop .55s ease-out 2}
+.cat.happy .eyes{opacity:0}.cat.happy .happyEyes{opacity:1}
+.cat.happy .tail{animation-duration:.35s}
+@keyframes hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-16px) scale(1.04)}70%{transform:translateY(2px) scaleY(.95)}}
+/* грустит */
+.cat.sad{animation:sigh .5s ease-in-out}
+.cat.sad .eyes{opacity:0}.cat.sad .sadEyes,.cat.sad .tear{opacity:1}
+.cat.sad .earL{transform:rotate(-38deg)}.cat.sad .earR{transform:rotate(38deg)}
+.cat.sad .tail{animation:none;transform:rotate(55deg)}
+.cat.sad .tear{animation:drip 1.4s ease-in infinite}
+@keyframes sigh{20%{transform:translateX(-3px)}40%{transform:translateX(3px)}60%{transform:translateX(-2px)}80%{transform:translateX(1px)}}
+@keyframes drip{from{transform:translateY(0)}to{transform:translateY(7px);opacity:0}}
+/* реплика над котом */
+.bubble{position:fixed;right:max(14px,calc(50% - 266px));bottom:calc(132px + env(safe-area-inset-bottom));z-index:7;max-width:210px;
+  background:#160714;border:1px solid var(--neon);border-radius:14px 14px 4px 14px;padding:7px 11px;font-size:13.5px;line-height:1.35;color:#fff0f7;
+  box-shadow:0 0 12px rgba(255,79,163,.45);opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;pointer-events:none}
+.bubble.on{opacity:1;transform:none}
+.heart{position:fixed;z-index:7;pointer-events:none;color:#ff4fa3;font-size:15px;text-shadow:0 0 8px #ff4fa3;animation:float 1.3s ease-out forwards}
+@keyframes float{to{transform:translate(var(--dx),-70px) scale(1.3);opacity:0}}
+@media (prefers-reduced-motion:reduce){.cat,.cat *{animation:none!important}}
 .fade{animation:fade .3s ease}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}}
 </style>
@@ -150,15 +166,19 @@ textarea{min-height:100px;resize:vertical}
   <div class="progress" id="progress" hidden><div class="bar"><i id="barFill"></i></div><div class="step"><span id="stepName"></span><span id="stepNum"></span></div></div>
   <div id="screen"></div>
 </div>
-<div class="cat" id="cat" aria-hidden="true"><svg viewBox="0 0 120 70">
-  <path class="tail" d="M22,36 C10,32 6,20 12,12"/>
-  <path d="M86,37 C84,44 82,47 76,47 L34,47 C26,47 21,44 22,38 C24,26 40,22 58,24 C70,25 79,25 85,27"/>
-  <path class="head" d="M84,30 C84,20 90,14 98,14 C106,14 112,20 111,28 C110,35 104,39 97,39 C90,39 85,36 84,30Z"/>
-  <path d="M89,18 L90,7 L96,15 M103,15 L108,6 L109,18"/>
-  <circle class="eye" cx="101" cy="25" r="1.8"/><circle class="eye" cx="106.5" cy="25" r="1.8"/>
-  <path class="whisk" d="M110,30 L118,28 M110,32 L118,33"/>
-  <g class="leg l1"><path d="M34,46 L32,60"/></g><g class="leg l2"><path d="M42,46 L44,60"/></g>
-  <g class="leg l3"><path d="M74,46 L72,60"/></g><g class="leg l4"><path d="M82,45 L84,60"/></g>
+<div class="bubble" id="bubble"></div>
+<div class="cat" id="cat" title="Черрик"><svg viewBox="0 0 60 70">
+  <path class="tail" d="M44,63 C56,62 59,50 53,42"/>
+  <g class="body"><path d="M25,36 C18,42 15,54 19,64 L43,64 C47,54 45,42 37,36"/>
+    <line x1="26" y1="52" x2="26" y2="64"/><line x1="36" y1="52" x2="36" y2="64"/></g>
+  <path class="earL" d="M20,19 L19,6 L27,12"/><path class="earR" d="M35,12 L43,6 L42,19"/>
+  <path d="M18,24 C18,15 24,11 31,11 C38,11 44,15 44,24 C44,32 38,36 31,36 C24,36 18,32 18,24Z"/>
+  <g class="eyes"><circle cx="26" cy="23.5" r="2.1"/><circle cx="36" cy="23.5" r="2.1"/></g>
+  <path class="happyEyes" d="M23.5,25 Q26,21 28.5,25 M33.5,25 Q36,21 38.5,25"/>
+  <path class="sadEyes" d="M23.5,22.5 Q26,25.5 28.5,24 M33.5,24 Q36,25.5 38.5,22.5"/>
+  <circle class="tear" cx="25" cy="28" r="1.3" style="fill:#9fd8ff;stroke:none;filter:drop-shadow(0 0 3px #9fd8ff)"/>
+  <path d="M29,29 Q31,31 33,29"/>
+  <path class="whisk" d="M17,27 L9,25.5 M17,29 L9,30 M45,27 L53,25.5 M45,29 L53,30"/>
 </svg></div>
 <div class="foot"><div class="in"><button class="btn ghost" id="back">←</button><button class="btn" id="next">Дальше</button></div></div>
 
@@ -173,7 +193,8 @@ const WELCOME = `
 <p>Мы не стремимся к огромным цифрам и к большой толпе. Для нас важно качество и комфорт каждого. Мы ценим своих людей, за которыми легко уследить и с которыми приятно проводить время.</p>
 <h3>Чего мы ждём?</h3>
 <ul><li>Активности и позитива.</li><li>Искреннего интереса к жизни клана.</li><li>Комфортного общения без токсичности.</li></ul>
-<p class="note">Дальше — правила, информация о съёмках, состав администрации и анкета. Правила нужно именно прочитать: после каждой части будет пара вопросов. Ошибёшься — вернёшься перечитать.</p>`;
+<p class="note">Дальше — правила, информация о съёмках, состав администрации и анкета. Правила нужно именно прочитать: после каждой части будет пара вопросов. Ошибёшься — вернёшься перечитать.</p>
+<p class="note">Внизу сидит <b>Черрик</b> — он пройдёт с тобой весь путь до отправки анкеты 🐾</p>`;
 
 // Порядок экранов. type: "read" — текст, "quiz" — проверка по предыдущим блокам.
 const STEPS = [
@@ -485,6 +506,7 @@ function renderQuiz(s){
     const wrong = qs.filter((x,i)=> answers[i] !== x.a[0]).length;
     if (!wrong){
       $("#qmsg").innerHTML = `<div class="msg ok">Всё верно ✿</div>`;
+      cat("happy", PRAISE[Math.random()*PRAISE.length|0]);
       $("#qmsg").scrollIntoView({behavior:"smooth",block:"center"});
       nextBtn.textContent = "Дальше"; nextBtn.onclick = () => go(pos+1);
       reached = Math.max(reached, pos); save();
@@ -492,6 +514,7 @@ function renderQuiz(s){
       mistakes += wrong; save();
       const to = groupStart(pos);
       $("#qmsg").innerHTML = `<div class="msg bad">Неверных ответов: ${wrong}. Перечитай этот раздел — вопросы в следующий раз будут другие.</div>`;
+      cat("sad", "Ой… давай перечитаем 😿");
       $("#qmsg").scrollIntoView({behavior:"smooth",block:"center"});
       screen.querySelectorAll(".opt").forEach(o=>o.disabled=true);
       nextBtn.textContent = "Перечитать"; nextBtn.onclick = () => { reached = Math.min(reached, to-1); go(to); };
@@ -546,7 +569,8 @@ function renderForm(s){
     mark("dsmic", form.ds && form.mic);
     mark("dsname", (form.dsname||"").trim().length >= 2);
     mark("skin", !!skin);
-    if (bad){ bad.scrollIntoView({behavior:"smooth",block:"center"}); return; }
+    if (bad){ bad.scrollIntoView({behavior:"smooth",block:"center"}); cat("sad", "Чего-то не хватает…"); return; }
+    cat("happy", "Анкета готова! 💗");
     reached = Math.max(reached,pos); go(pos+1);
   };
 }
@@ -645,6 +669,32 @@ function renderDone(s){
   };
 }
 
+// ---------- Черрик ----------
+const catEl = $("#cat"), bubbleEl = $("#bubble");
+let catTimer = null, bubbleTimer = null;
+function say(text, ms = 2600){
+  bubbleEl.textContent = text; bubbleEl.classList.add("on");
+  clearTimeout(bubbleTimer); bubbleTimer = setTimeout(() => bubbleEl.classList.remove("on"), ms);
+}
+function hearts(){
+  const r = catEl.getBoundingClientRect();
+  for (let i=0;i<4;i++){
+    const h = document.createElement("div"); h.className = "heart"; h.textContent = "♥";
+    h.style.left = (r.left + r.width/2 - 6 + (Math.random()-.5)*20) + "px"; h.style.top = (r.top + 6) + "px";
+    h.style.setProperty("--dx", ((Math.random()-.5)*50).toFixed(0) + "px"); h.style.animationDelay = (i*.12) + "s";
+    document.body.appendChild(h); setTimeout(() => h.remove(), 1700);
+  }
+}
+function cat(mood, text){
+  catEl.classList.remove("happy","sad"); void catEl.offsetWidth;   // перезапуск анимации
+  if (mood) catEl.classList.add(mood);
+  if (mood === "happy") hearts();
+  if (text) say(text, mood === "sad" ? 3400 : 2600);
+  clearTimeout(catTimer); catTimer = setTimeout(() => catEl.classList.remove("happy","sad"), mood === "sad" ? 3400 : 1600);
+}
+const PRAISE = ["Верно! 💗", "Умница! ✨", "Так держать!", "Мур, всё правильно 🐾"];
+catEl.onclick = () => cat("happy", ["Мур~ 💗", "Мяу!", "Я Черрик 🐾", "Читай внимательно, я слежу 👀"][Math.random()*4|0]);
+
 function go(i){ pos = i; render(); }
 backBtn.onclick = () => { if (pos >= 0) go(pos-1); };
 
@@ -670,6 +720,7 @@ backBtn.onclick = () => { if (pos >= 0) go(pos-1); };
 })();
 
 load(); render();
+setTimeout(() => say(reached >= 0 ? "С возвращением! 🐾" : "Привет! Я Черрик, побуду с тобой до конца анкеты 🐾", 4200), 700);
 </script>
 </body>
 </html>
