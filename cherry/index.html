@@ -134,7 +134,18 @@ textarea{min-height:100px;resize:vertical}
 .cat .happyEyes,.cat .sadEyes,.cat .tear{opacity:0;transition:opacity .2s}
 @keyframes breathe{50%{transform:scaleY(1.035)}}
 @keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
-@keyframes swish{from{transform:rotate(-8deg)}to{transform:rotate(14deg)}}
+@keyframes swish{from{transform:rotate(-14deg)}to{transform:rotate(22deg)}}
+/* случайные «живые» движения в покое */
+.cat.tilt .head{animation:tilt 1.6s ease-in-out}
+.cat.twitch .earR{animation:twitch .5s ease-in-out 2}
+.cat.look .eyes{animation:look 2s ease-in-out}
+.cat.flick .tail{animation:flick .9s ease-in-out}
+.cat.wiggle{animation:wiggle 1s ease-in-out}
+@keyframes tilt{30%,70%{transform:rotate(-14deg)}}
+@keyframes twitch{50%{transform:rotate(22deg)}}
+@keyframes look{20%,45%{transform:translateX(-2.4px)}60%,85%{transform:translateX(2.4px)}}
+@keyframes flick{0%{transform:rotate(0)}30%{transform:rotate(45deg)}60%{transform:rotate(-20deg)}100%{transform:rotate(0)}}
+@keyframes wiggle{20%{transform:translateY(-7px)}40%{transform:translateY(0)}60%{transform:translateY(-4px)}80%{transform:translateY(0)}}
 /* радуется */
 .cat.happy{animation:hop .55s ease-out 2}
 .cat.happy .eyes{opacity:0}.cat.happy .happyEyes{opacity:1}
@@ -670,6 +681,19 @@ catEl.onclick = () => {
   if (now < annoyedUntil) return;   // пока ворчит — на одиночные тапы не отвлекается
   cat("happy", ["Мур~ 💗", "Мяу!", "Я Черрик 🐾", "Читай внимательно, я слежу 👀"][Math.random()*4|0]);
 };
+
+// В покое раз в 4–8 секунд кот делает что-нибудь заметное, чтобы было видно, что он живой
+const IDLE = ["tilt", "twitch", "look", "flick", "wiggle"];
+(function idle(){
+  setTimeout(() => {
+    const busy = ["happy","sad","annoyed","sulk"].some(c => catEl.classList.contains(c));
+    if (!busy && !document.hidden){
+      const a = IDLE[Math.random()*IDLE.length|0];
+      catEl.classList.add(a); setTimeout(() => catEl.classList.remove(a), 2100);
+    }
+    idle();
+  }, 4000 + Math.random()*4000);
+})();
 
 function go(i){ pos = i; render(); }
 backBtn.onclick = () => { if (pos >= 0) go(pos-1); };
