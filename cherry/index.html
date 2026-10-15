@@ -715,10 +715,10 @@ catEl.onclick = () => {
   if (now < sulkUntil){ if (Math.random() < .35) say("Хмф 😤", 1200); return; }
   taps = taps.filter(x => now - x < 3000); taps.push(now);
   if (now < annoyedUntil && taps.length >= 3){   // предупредили, а всё равно тапают
-    taps = []; sulkUntil = now + 6000; annoyedUntil = 0;
+    taps = []; sulkUntil = now + 10000; annoyedUntil = 0;
     clearTimeout(catTimer); catEl.classList.remove("happy","sad","annoyed"); catEl.classList.add("sulk");
     say("Всё, я обиделся 😤", 3000);
-    setTimeout(() => { catEl.classList.remove("sulk"); cat("happy", "Ладно, прощаю 🐾"); }, 6000);
+    setTimeout(() => { catEl.classList.remove("sulk"); cat("happy", "Ладно, прощаю 🐾"); }, 10000);
     return;
   }
   if (taps.length >= 5){
