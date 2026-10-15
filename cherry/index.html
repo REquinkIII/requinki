@@ -100,6 +100,9 @@ textarea{min-height:100px;resize:vertical}
 .err{font-size:13px;color:var(--bad);margin-top:5px;display:none}
 .field.invalid input,.field.invalid textarea{border-color:var(--bad);box-shadow:0 0 10px rgba(255,107,139,.35)}
 .field.invalid .err{display:block}
+.pick{display:flex;align-items:center;justify-content:center;gap:10px;min-height:64px;border:1.5px dashed var(--neon);border-radius:12px;padding:10px;cursor:pointer;color:var(--neon2);font-family:Inter,sans-serif;font-size:14px;text-transform:none;letter-spacing:0;background:rgba(255,79,163,.06)}
+.pick img{max-height:140px;max-width:60%;border-radius:8px;box-shadow:var(--glow)}
+.field.invalid .pick{border-color:var(--bad)}
 .check{display:flex;gap:10px;align-items:center;margin:10px 0}
 .check input{width:20px;height:20px;accent-color:var(--neon)}
 
@@ -128,9 +131,9 @@ textarea{min-height:100px;resize:vertical}
    главное не трогать кавычки и запятые между блоками. */
 
 const WELCOME = `
-<p>❮ Привет-привет! На связи <b>Кисари</b>, глава клана. Рад видеть тебя в нашем уютном уголке! ❯</p>
-<p>От лица всей администрации хочу сказать: мы строим не просто клан по Evade, а место с по-настоящему тёплой атмосферой.</p>
-<p>Мы не стремимся к огромным цифрам и к большой толпе. Для нас важно качество и комфорт каждого.</p>
+<p>❮ Привет-привет! На связи администрация клана — <b>Кисари, Верс, Тайга, Арлекин и Рекви</b>. Рады видеть тебя в нашем уютном уголке! ❯</p>
+<p>Мы строим не просто клан по Evade, а место с по-настоящему тёплой атмосферой.</p>
+<p>Мы не стремимся к огромным цифрам и к большой толпе. Для нас важно качество и комфорт каждого. Мы ценим своих людей, за которыми легко уследить и с которыми приятно проводить время.</p>
 <h3>Чего мы ждём?</h3>
 <ul><li>Активности и позитива.</li><li>Искреннего интереса к жизни клана.</li><li>Комфортного общения без токсичности.</li></ul>
 <p class="note">Дальше — правила, информация о съёмках, состав администрации и анкета. Правила нужно именно прочитать: после каждой части будет пара вопросов. Ошибёшься — вернёшься перечитать.</p>`;
@@ -376,7 +379,7 @@ function header(title, kicker, logo){
 
 // «Дальше» открывается, когда текст долистан до конца и прошло время на чтение
 function gateReading(chars){
-  let left = Math.round(Math.min(25, Math.max(6, chars/25)));
+  let left = Math.round(Math.min(15, Math.max(10, chars/40)));   // 10–15 секунд в зависимости от длины
   let scrolled = false;
   const check = () => {
     if (!scrolled && window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 140) scrolled = true;
@@ -469,7 +472,7 @@ function renderAdmins(s){
 function renderForm(s){
   screen.innerHTML = header("Анкета","твой билет в команду") + `<div class="card fade">
     <p>Анкета — это твоё «лицо» и первый шаг к знакомству. Заполняй подробно: <b>краткие анкеты не рассматриваются</b>.</p>
-    <p class="note">Примеры анкет: <a href="${EXAMPLES_URL}" target="_blank">канал с анкетами</a>. Скриншот скина бот попросит после отправки.</p>
+    <p class="note">Примеры анкет: <a href="${EXAMPLES_URL}" target="_blank">канал с анкетами</a>.</p>
     ${FIELDS.map(f=>`<div class="field" id="f_${f.id}"><label for="${f.id}">${f.label}${f.hint?` <small>— ${f.hint}</small>`:""}</label>
       ${f.area?`<textarea id="${f.id}"></textarea>`:`<input id="${f.id}" ${f.num?'inputmode="numeric"':""}>`}
       ${f.min>20?`<div class="count" id="c_${f.id}"></div>`:""}<div class="err">${f.err||"Заполни подробнее."}</div></div>`).join("")}
@@ -478,12 +481,24 @@ function renderForm(s){
     <div class="check"><input type="checkbox" id="mic"><span>У меня есть микрофон</span></div>
     <div class="field" id="f_dsmic"><div class="err">Без Discord и микрофона участвовать в съёмках не получится.</div></div>
     <div class="field" id="f_dsname"><label for="dsname">Ник в Discord</label><input id="dsname"><div class="err">Укажи ник в Discord.</div></div>
+    <div class="field" id="f_skin"><label>Скриншот скина <small>— обязательно</small></label>
+      <label class="pick" for="skinfile"><img id="skinprev" alt="" hidden><span id="skinlbl">📸 Выбрать фото</span></label>
+      <input type="file" id="skinfile" accept="image/*" hidden>
+      <div class="err">Прикрепи скриншот своего скина.</div></div>
   </div>`;
   const all = [...FIELDS.map(f=>f.id),"dsname"];
   all.forEach(id => { const el=$("#"+id); el.value = form[id]||""; el.oninput = () => { form[id]=el.value; save(); counts(); }; });
   ["ds","mic"].forEach(id => { const el=$("#"+id); el.checked=!!form[id]; el.onchange=()=>{form[id]=el.checked; save();}; });
   function counts(){ FIELDS.filter(f=>f.min>20).forEach(f=>{ const n=(form[f.id]||"").trim().length, c=$("#c_"+f.id); c.textContent = n<f.min ? `${n} / минимум ${f.min}` : `${n} ✓`; c.classList.toggle("low", n<f.min); }); }
   counts();
+  const showSkin = () => { if (skin){ $("#skinprev").src = skin.url; $("#skinprev").hidden = false; $("#skinlbl").textContent = "Заменить фото"; } };
+  $("#skinfile").onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    $("#skinlbl").textContent = "Обрабатываю…";
+    try { skin = await shrink(f); showSkin(); $("#f_skin").classList.remove("invalid"); }
+    catch(err){ $("#skinlbl").textContent = "Не получилось открыть фото, выбери другое"; }
+  };
+  showSkin();
   nextBtn.textContent = "Проверить анкету";
   nextBtn.onclick = () => {
     let bad = null;
@@ -491,34 +506,88 @@ function renderForm(s){
     FIELDS.forEach(f => { const v=(form[f.id]||"").trim(); mark(f.id, f.num ? (parseInt(v,10) >= f.num) : v.length >= f.min); });
     mark("dsmic", form.ds && form.mic);
     mark("dsname", (form.dsname||"").trim().length >= 2);
+    mark("skin", !!skin);
     if (bad){ bad.scrollIntoView({behavior:"smooth",block:"center"}); return; }
     reached = Math.max(reached,pos); go(pos+1);
   };
 }
 
-function payload(){
+function payload(skinUrl){
   const v = id => (form[id]||"").trim();
-  return { v:1, mistakes, a:{ name:v("name"), nick:v("nick"), rbx:v("rbx"), age:v("age"), tz:v("tz"), lvl:v("lvl"), exp:v("exp"), motiv:v("motiv"), about:v("about"), discord:v("dsname") } };
+  return { v:1, mistakes, skin: skinUrl || "", a:{ name:v("name"), nick:v("nick"), rbx:v("rbx"), age:v("age"), tz:v("tz"), lvl:v("lvl"), exp:v("exp"), motiv:v("motiv"), about:v("about"), discord:v("dsname") } };
+}
+
+// Фото сжимаем до 1280 px: быстрее грузится и меньше трафика.
+// В localStorage оно не сохраняется — если закрыть приложение, фото нужно выбрать заново.
+let skin = null;   // {blob, url}
+function shrink(file){
+  return new Promise((ok, fail) => {
+    const img = new Image(), src = URL.createObjectURL(file);
+    img.onload = () => {
+      const k = Math.min(1, 1280 / Math.max(img.width, img.height));
+      const c = document.createElement("canvas"); c.width = Math.round(img.width*k); c.height = Math.round(img.height*k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(b => b ? ok({blob:b, url:URL.createObjectURL(b)}) : fail(new Error("toBlob")), "image/jpeg", .87);
+    };
+    img.onerror = fail; img.src = src;
+  });
+}
+
+// Боту картинку напрямую не передать (Telegram пропускает из приложения только 4 КБ текста),
+// поэтому фото кладём на временный хостинг, а бот забирает его оттуда по ссылке.
+const UPLOADERS = [
+  async b => { const fd = new FormData(); fd.append("reqtype","fileupload"); fd.append("time","24h"); fd.append("fileToUpload", b, "skin.jpg");
+    const r = await fetch("https://litterbox.catbox.moe/resources/internals/api.php", {method:"POST", body:fd});
+    const u = (await r.text()).trim(); if (!r.ok || !/^https:\/\/litter\.catbox\.moe\//.test(u)) throw new Error(u.slice(0,80)); return u; },
+  async b => { const fd = new FormData(); fd.append("file", b, "skin.jpg");
+    const r = await fetch("https://tmpfiles.org/api/v1/upload", {method:"POST", body:fd});
+    const j = await r.json(); if (j.status !== "success") throw new Error(j.message);
+    return j.data.url.replace("tmpfiles.org/", "tmpfiles.org/dl/").replace("http://", "https://"); },
+];
+async function uploadSkin(){
+  for (const up of UPLOADERS){
+    try { return await Promise.race([up(skin.blob), new Promise((_,f)=>setTimeout(()=>f(new Error("timeout")), 25000))]); }
+    catch(e){ console.warn("upload failed", e); }
+  }
+  return "";
+}
+
+function send(skinUrl){
+  const data = JSON.stringify(payload(skinUrl));
+  const inTelegram = tg && tg.platform && tg.platform !== "unknown";
+  if (inTelegram) {
+    try { tg.sendData(data); try{ localStorage.removeItem(SAVE_KEY); }catch(e){} return; }
+    catch(e) {   // открыли не той кнопкой: sendData работает только с кнопки под полем ввода
+      $("#out").innerHTML = `<div class="msg bad">Не получилось отправить. Закрой приложение и открой его кнопкой <b>«🌸 Вступить в клан»</b> под полем ввода сообщения — твои ответы сохранятся.</div>`;
+      nextBtn.disabled = false; nextBtn.textContent = "Отправить анкету";
+      return;
+    }
+  }
+  // открыто в обычном браузере — показываем, что ушло бы боту
+  $("#out").innerHTML = `<div class="msg bad">Это не Telegram, поэтому показываю, что получит бот:</div><pre style="white-space:pre-wrap;font-size:12px">${esc(JSON.stringify(payload(skinUrl),null,1))}</pre>`;
+  nextBtn.disabled = false; nextBtn.textContent = "Отправить анкету";
 }
 
 function renderDone(s){
   screen.innerHTML = header("Почти готово","последний шаг") + `<div class="card fade">
-    <p>Правила прочитаны, анкета заполнена. Нажми «Отправить» — анкета уйдёт администрации.</p>
-    <p><b>Сразу после этого пришли боту скриншот своего скина</b> — без него анкету не рассмотрят.</p>
+    <p>Правила прочитаны, анкета заполнена. Нажми «Отправить» — анкета вместе со скриншотом скина уйдёт администрации.</p>
+    ${skin ? `<img src="${skin.url}" alt="" style="max-height:160px;border-radius:10px;box-shadow:var(--glow);display:block;margin:6px auto 10px">` : ""}
     <div id="out"></div></div>`;
+  if (!skin){   // приложение перезапускали — фото не сохраняется, выбрать заново
+    nextBtn.textContent = "Выбрать фото скина";
+    nextBtn.onclick = () => go(pos-1);
+    $("#out").innerHTML = `<div class="msg bad">Фото скина нужно выбрать заново — вернись на шаг назад.</div>`;
+    return;
+  }
   nextBtn.textContent = "Отправить анкету";
-  nextBtn.onclick = () => {
-    const data = JSON.stringify(payload());
-    const inTelegram = tg && tg.platform && tg.platform !== "unknown";
-    if (inTelegram) {
-      try { tg.sendData(data); try{ localStorage.removeItem(SAVE_KEY); }catch(e){} return; }
-      catch(e) {   // открыли не той кнопкой: sendData работает только с кнопки под полем ввода
-        $("#out").innerHTML = `<div class="msg bad">Не получилось отправить. Закрой приложение и открой его кнопкой <b>«🌸 Вступить в клан»</b> под полем ввода сообщения — твои ответы сохранятся.</div>`;
-        return;
-      }
-    }
-    // открыто в обычном браузере — показываем, что ушло бы боту
-    $("#out").innerHTML = `<div class="msg bad">Это не Telegram, поэтому показываю, что получит бот:</div><pre style="white-space:pre-wrap;font-size:12px">${esc(JSON.stringify(payload(),null,1))}</pre>`;
+  nextBtn.onclick = async () => {
+    nextBtn.disabled = true; nextBtn.textContent = "Загружаю скин…";
+    const url = await uploadSkin();
+    if (url) return send(url);
+    nextBtn.disabled = false; nextBtn.textContent = "Попробовать ещё раз";
+    $("#out").innerHTML = `<div class="msg bad">Не получилось загрузить фото (бывает при плохом интернете или VPN). Попробуй ещё раз — или отправь анкету без фото, и бот попросит прислать скин в чат.</div>
+      <button class="btn ghost" id="nophoto" style="width:100%">Отправить без фото</button>`;
+    $("#nophoto").onclick = () => send("");
   };
 }
 
