@@ -182,6 +182,62 @@ textarea{min-height:100px;resize:vertical}
 @media (prefers-reduced-motion:reduce){.cat,.cat *{animation:none!important}}
 .fade{animation:fade .3s ease}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}}
+
+/* ===== Анки — андроид-регистратор: сидит внизу слева, отвечает по делу ===== */
+.anki{position:fixed;left:max(14px,calc(50% - 266px));bottom:calc(64px + env(safe-area-inset-bottom));width:50px;height:62px;z-index:7;cursor:pointer;animation:hover 3.6s ease-in-out infinite}
+.anki svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 2.5px #ff4fa3) drop-shadow(0 0 8px rgba(255,79,163,.7))}
+.anki path,.anki rect,.anki line{fill:none;stroke:#ff8fc4;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.anki .scr{fill:rgba(255,79,163,.16)}
+.anki .fl{fill:#ff4fa3;stroke:none;filter:drop-shadow(0 0 3px #ff4fa3)}
+.anki .cheek{fill:rgba(255,79,163,.6);stroke:none}
+.anki .e-ok,.anki .e-err{opacity:0;transition:opacity .15s}
+.anki .e-norm{transform-box:fill-box;transform-origin:center;animation:ablink 5.2s infinite}
+.anki.ok .e-norm,.anki.err .e-norm{opacity:0}.anki.ok .e-ok{opacity:1}.anki.err .e-err{opacity:1}
+.anki.err .e-err{stroke:#ff6b8b}
+.anki.ok{animation:ahop .5s ease-out 2}
+.anki.err{animation:ashake .45s ease-in-out}
+.anki .ant{transform-box:fill-box;transform-origin:50% 100%;animation:antsway 2.8s ease-in-out infinite alternate}
+@keyframes hover{50%{transform:translateY(-4px)}}
+@keyframes ablink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.15)}}
+@keyframes ahop{40%{transform:translateY(-12px)}}
+@keyframes ashake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@keyframes antsway{from{transform:rotate(-10deg)}to{transform:rotate(10deg)}}
+.abubble{position:fixed;left:max(14px,calc(50% - 266px));bottom:calc(132px + env(safe-area-inset-bottom));z-index:7;max-width:230px;
+  background:#160714;border:1px solid var(--violet);border-radius:14px 14px 14px 4px;padding:7px 11px;font:13px/1.4 var(--mono);color:#f3e8ff;
+  box-shadow:0 0 12px rgba(176,123,255,.45);opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;pointer-events:none}
+.abubble.on{opacity:1;transform:none}
+.abubble b{color:var(--neon2);font-weight:600}
+
+/* ===== Черрик-шкодник: прячется и выглядывает с краёв экрана ===== */
+.peek{position:fixed;z-index:8;width:74px;height:56px;pointer-events:none;transition:transform .55s cubic-bezier(.34,1.56,.64,1)}
+.peek.on{pointer-events:auto}
+.peek .cat{position:static;width:100%;height:100%}
+.peek .cat .body,.peek .cat .tail{display:none}
+.bubble.free{right:auto;bottom:auto;border-radius:14px}
+
+/* ===== заставка: Анки и Черрик знакомятся ===== */
+.intro{position:fixed;inset:0;z-index:30;background:radial-gradient(circle at 50% 40%,rgba(255,79,163,.22),transparent 60%),var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;transition:opacity .5s}
+.intro.out{opacity:0;pointer-events:none}
+.intro .duo{display:flex;align-items:flex-end;gap:34px}
+.intro .who{display:flex;flex-direction:column;align-items:center;gap:10px;opacity:0;transform:translateY(18px);transition:opacity .5s,transform .5s cubic-bezier(.34,1.56,.64,1)}
+.intro .who.in{opacity:1;transform:none}
+.intro .fig{width:96px;height:112px}
+.intro .fig svg{width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 4px #ff4fa3) drop-shadow(0 0 14px rgba(255,79,163,.7))}
+.intro .fig path,.intro .fig rect,.intro .fig line{fill:none;stroke:#ffd0e6;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.intro .fig .scr{fill:rgba(255,79,163,.16)}.intro .fig .fl{fill:#ff4fa3;stroke:none}.intro .fig .cheek{fill:rgba(255,79,163,.6);stroke:none}
+.intro .fig .eyes circle{fill:#ff4fa3;stroke:none}
+.intro .fig .e-ok,.intro .fig .e-err,.intro .fig .happyEyes,.intro .fig .sadEyes,.intro .fig .tear,.intro .fig .angryEyes{display:none}
+.intro .name{font:600 12px var(--mono);letter-spacing:.2em;color:var(--neon2);text-transform:uppercase}
+.intro .lines{min-height:96px;max-width:330px;width:100%;display:flex;flex-direction:column;gap:8px}
+.intro .ln{padding:8px 12px;border-radius:14px;font-size:14px;line-height:1.4;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s}
+.intro .ln.in{opacity:1;transform:none}
+.intro .ln.a{align-self:flex-start;background:#160714;border:1px solid var(--violet);font-family:var(--mono);font-size:13px;border-bottom-left-radius:4px;color:#f3e8ff}
+.intro .ln.c{align-self:flex-end;background:#160714;border:1px solid var(--neon);border-bottom-right-radius:4px}
+.intro .load{width:220px;height:4px;border-radius:4px;background:rgba(255,79,163,.15);overflow:hidden}
+.intro .load i{display:block;height:100%;width:0;background:var(--neon);box-shadow:0 0 10px var(--neon);transition:width 1.6s ease-in-out}
+.intro .skip{font:12px var(--mono);color:var(--soft)}
+@media (prefers-reduced-motion:reduce){.anki,.anki *,.peek{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
@@ -191,6 +247,21 @@ textarea{min-height:100px;resize:vertical}
   <div id="screen"></div>
 </div>
 <div class="bubble" id="bubble"></div>
+<div class="abubble" id="abubble"></div>
+<div class="anki" id="anki" title="Анки"><svg viewBox="0 0 60 72">
+  <g class="ant"><line x1="30" y1="14" x2="30" y2="6"/><circle class="fl" cx="30" cy="4.5" r="3"/></g>
+  <rect x="10" y="14" width="40" height="31" rx="12"/>
+  <rect class="scr" x="15" y="19" width="30" height="21" rx="7"/>
+  <rect x="5.5" y="23" width="4.5" height="13" rx="2.2"/><rect x="50" y="23" width="4.5" height="13" rx="2.2"/>
+  <path class="e-norm" d="M20.5 29.5 Q23.5 26 26.5 29.5 M33.5 29.5 Q36.5 26 39.5 29.5"/>
+  <path class="e-ok" d="M20.5 30 Q23.5 25 26.5 30 M33.5 30 Q36.5 25 39.5 30"/>
+  <path class="e-err" d="M21 26.5 L26 31.5 M26 26.5 L21 31.5 M34 26.5 L39 31.5 M39 26.5 L34 31.5"/>
+  <ellipse class="cheek" cx="19" cy="34" rx="2.6" ry="1.5"/><ellipse class="cheek" cx="41" cy="34" rx="2.6" ry="1.5"/>
+  <path d="M27 34.5 Q30 37 33 34.5"/>
+  <line x1="26" y1="45" x2="26" y2="49"/><line x1="34" y1="45" x2="34" y2="49"/>
+  <path d="M14 70 C14 57 20 49 30 49 C40 49 46 57 46 70"/>
+  <path d="M30 63 C27 60.5 25.5 58.5 27.5 57.3 C28.8 56.6 30 57.8 30 58.6 C30 57.8 31.2 56.6 32.5 57.3 C34.5 58.5 33 60.5 30 63Z"/>
+</svg></div>
 <div class="cat" id="cat" title="Черрик"><svg viewBox="0 0 60 70">
   <path class="tail" d="M44,63 C56,62 59,50 53,42"/>
   <g class="body"><path d="M25,36 C18,42 15,54 19,64 L43,64 C47,54 45,42 37,36"/>
@@ -219,7 +290,7 @@ const WELCOME = `
 <h3>Чего мы ждём?</h3>
 <ul><li>Активности и позитива.</li><li>Искреннего интереса к жизни клана.</li><li>Комфортного общения без токсичности.</li></ul>
 <p class="note">Дальше — правила, информация о съёмках, состав администрации и анкета. Правила нужно именно прочитать: после каждой части будет пара вопросов. Ошибёшься — вернёшься перечитать.</p>
-<p class="note">Внизу сидит <b>Черрик</b> — он пройдёт с тобой весь путь до отправки анкеты 🐾</p>`;
+<p class="note">Внизу слева — <b>Анки</b>, андроид-регистратор: подскажет по каждому шагу. А <b>Черрик</b>… где-то прячется. Найдёшь — погладь 🐾</p>`;
 
 // Порядок экранов. type: "read" — текст, "quiz" — проверка по предыдущим блокам.
 const STEPS = [
@@ -428,6 +499,7 @@ function render(){
     return;
   }
   const s = STEPS[pos];
+  ankiHint(s);
   if (s.type === "read")  return renderRead(s);
   if (s.type === "quiz")  return renderQuiz(s);
   if (s.type === "admins")return renderAdmins(s);
@@ -469,7 +541,7 @@ function renderQuiz(s){
     const wrong = qs.filter((x,i)=> answers[i] !== x.a[0]).length;
     if (!wrong){
       $("#qmsg").innerHTML = `<div class="msg ok">Всё верно ✿</div>`;
-      cat("happy", PRAISE[Math.random()*PRAISE.length|0]);
+      anki("ok", ANKI_OK[Math.random()*ANKI_OK.length|0]); if (Math.random() < .5) setTimeout(() => cat("happy", PRAISE[Math.random()*PRAISE.length|0]), 900);
       $("#qmsg").scrollIntoView({behavior:"smooth",block:"center"});
       nextBtn.textContent = "Дальше"; nextBtn.onclick = () => go(pos+1);
       reached = Math.max(reached, pos); save();
@@ -477,7 +549,7 @@ function renderQuiz(s){
       mistakes += wrong; save();
       const to = groupStart(pos);
       $("#qmsg").innerHTML = `<div class="msg bad">Неверных ответов: ${wrong}. Перечитай этот раздел — вопросы в следующий раз будут другие.</div>`;
-      cat("sad", "Ой… давай перечитаем 😿");
+      anki("err", `Ошибок: <b>${wrong}</b>. Возвращаю к началу раздела — перечитай, вопросы будут другие.`, 4200);
       $("#qmsg").scrollIntoView({behavior:"smooth",block:"center"});
       screen.querySelectorAll(".opt").forEach(o=>o.disabled=true);
       nextBtn.textContent = "Перечитать"; nextBtn.onclick = () => { reached = Math.min(reached, to-1); go(to); };
@@ -532,8 +604,8 @@ function renderForm(s){
     mark("dsmic", form.ds && form.mic);
     mark("dsname", (form.dsname||"").trim().length >= 2);
     mark("skin", !!skin);
-    if (bad){ bad.scrollIntoView({behavior:"smooth",block:"center"}); cat("sad", "Чего-то не хватает…"); return; }
-    cat("happy", "Анкета готова! 💗");
+    if (bad){ bad.scrollIntoView({behavior:"smooth",block:"center"}); anki("err", "Не все поля заполнены — отметила их <b>красным</b>.", 3800); return; }
+    anki("ok", "Анкета проверена ✓ Остался последний шаг."); setTimeout(() => cat("happy", "Анкета готова! 💗"), 700);
     reached = Math.max(reached,pos); go(pos+1);
   };
 }
@@ -632,68 +704,125 @@ function renderDone(s){
   };
 }
 
-// ---------- Черрик ----------
+// ---------- Анки ----------
+const ankiEl = $("#anki"), aBubbleEl = $("#abubble");
+let ankiTimer = null, aBubbleTimer = null;
+function anki(mood, html, ms = 3200){
+  ankiEl.classList.remove("ok","err"); void ankiEl.offsetWidth;
+  if (mood) ankiEl.classList.add(mood);
+  clearTimeout(ankiTimer); ankiTimer = setTimeout(() => ankiEl.classList.remove("ok","err"), mood === "err" ? 2600 : 1400);
+  if (html){ aBubbleEl.innerHTML = html; aBubbleEl.classList.add("on");
+    clearTimeout(aBubbleTimer); aBubbleTimer = setTimeout(() => aBubbleEl.classList.remove("on"), ms); }
+}
+const ANKI_OK = ["Верно ✓", "Ответы приняты ✓", "Проверка пройдена ✓ Идём дальше.", "Всё правильно ✓"];
+const ANKI_HINT = {
+  read:   "Читай внимательно. «Дальше» откроется, когда долистаешь до конца.",
+  quiz:   "Проверка по прочитанному. Ошибёшься — верну перечитать, без штрафа.",
+  admins: "Это администрация. С любыми вопросами — к ним.",
+  form:   "Заполняй подробно: под полями видно, сколько ещё символов нужно.",
+  done:   "Проверь скин и отправляй. Я передам анкету администрации ✓",
+};
+const hinted = new Set();
+function ankiHint(s){
+  if (hinted.has(pos) || !ANKI_HINT[s.type]) return;
+  hinted.add(pos); setTimeout(() => anki(null, ANKI_HINT[s.type], 4200), 500);
+}
+ankiEl.onclick = () => {
+  const s = pos >= 0 ? STEPS[pos] : null;
+  anki("ok", s && ANKI_HINT[s.type] ? ANKI_HINT[s.type] : "Я Анки, андроид-регистратор клана 🌸 Нажимай «Начать».", 4200);
+};
+
+// ---------- Черрик: шкодник, выглядывает с краёв ----------
 const catEl = $("#cat"), bubbleEl = $("#bubble");
-let catTimer = null, bubbleTimer = null;
+const peekEl = document.createElement("div"); peekEl.className = "peek"; document.body.appendChild(peekEl); peekEl.appendChild(catEl);
+catEl.querySelector("svg").setAttribute("viewBox", "6 2 50 38");     // только морда: тело и хвост за краем
+let catTimer = null, bubbleTimer = null, peekTimer = null, peekSide = null;
 function say(text, ms = 2600){
-  bubbleEl.textContent = text; bubbleEl.classList.add("on");
+  bubbleEl.textContent = text; bubbleEl.classList.add("on", "free");
+  const r = peekEl.getBoundingClientRect(), W = innerWidth, H = innerHeight, bw = Math.min(210, W - 28);
+  let x = r.left + r.width/2 - bw/2, y = r.bottom + 8;
+  if (peekSide === "left")  { x = r.right + 8; y = r.top + r.height/2 - 18; }
+  if (peekSide === "right") { x = r.left - bw - 8; y = r.top + r.height/2 - 18; }
+  bubbleEl.style.left = Math.max(14, Math.min(W - bw - 14, x)) + "px";
+  bubbleEl.style.top = Math.max(14, Math.min(H - 160, y)) + "px";
   clearTimeout(bubbleTimer); bubbleTimer = setTimeout(() => bubbleEl.classList.remove("on"), ms);
 }
 function hearts(){
-  const r = catEl.getBoundingClientRect();
+  const r = peekEl.getBoundingClientRect();
   for (let i=0;i<4;i++){
     const h = document.createElement("div"); h.className = "heart"; h.textContent = "♥";
-    h.style.left = (r.left + r.width/2 - 6 + (Math.random()-.5)*20) + "px"; h.style.top = (r.top + 6) + "px";
+    h.style.left = (r.left + r.width/2 - 6 + (Math.random()-.5)*20) + "px"; h.style.top = (r.top + r.height/2) + "px";
     h.style.setProperty("--dx", ((Math.random()-.5)*50).toFixed(0) + "px"); h.style.animationDelay = (i*.12) + "s";
     document.body.appendChild(h); setTimeout(() => h.remove(), 1700);
   }
 }
-function cat(mood, text){
-  if (Date.now() < sulkUntil) return;   // обиженный кот не реагирует
-  catEl.classList.remove("happy","sad","annoyed"); void catEl.offsetWidth;   // перезапуск анимации
-  if (mood) catEl.classList.add(mood);
-  if (mood === "happy") hearts();
-  if (text) say(text, mood === "sad" ? 3400 : 2600);
-  clearTimeout(catTimer); catTimer = setTimeout(() => catEl.classList.remove("happy","sad"), mood === "sad" ? 3400 : 1600);
+const HIDE = {top:"translateY(-110%) rotate(180deg)", left:"translateX(-120%) rotate(90deg)", right:"translateX(120%) rotate(-90deg)"};
+const SHOW = {top:"translateY(2%) rotate(180deg)",  left:"translateX(-4%) rotate(90deg)",  right:"translateX(4%) rotate(-90deg)"};
+function peek(ms = 4200, side){
+  clearTimeout(peekTimer);
+  peekSide = side || ["top","top","left","right"][Math.random()*4|0];
+  peekEl.style.transition = "none"; peekEl.classList.remove("on");
+  peekEl.style.top = peekEl.style.left = peekEl.style.right = "";
+  if (peekSide === "top"){ peekEl.style.top = "0"; peekEl.style.left = (14 + Math.random()*(innerWidth - 90)) + "px"; }
+  else { peekEl.style.top = (90 + Math.random()*(innerHeight*.45)) + "px"; peekEl.style[peekSide] = "-8px"; }
+  peekEl.style.transform = HIDE[peekSide]; void peekEl.offsetWidth;
+  peekEl.style.transition = ""; peekEl.style.transform = SHOW[peekSide]; peekEl.classList.add("on");
+  peekTimer = setTimeout(hide, ms);
 }
-const PRAISE = ["Верно! 💗", "Умница! ✨", "Так держать!", "Мур, всё правильно 🐾"];
-// Тапы: обычно мурчит; 5 тапов за 3 секунды — мотает головой; не перестали — обижается
-let taps = [], annoyedUntil = 0, sulkUntil = 0;
+function hide(){ clearTimeout(peekTimer); if (peekSide) peekEl.style.transform = HIDE[peekSide]; peekEl.classList.remove("on"); bubbleEl.classList.remove("on"); }
+function cat(mood, text){
+  peek(3600);
+  catEl.classList.remove("happy","sad","annoyed"); void catEl.offsetWidth;
+  if (mood) catEl.classList.add(mood);
+  setTimeout(() => { if (mood === "happy") hearts(); if (text) say(text, 2600); }, 450);
+  clearTimeout(catTimer); catTimer = setTimeout(() => catEl.classList.remove("happy","sad"), 1600);
+}
+const PRAISE = ["Мур, умница! 💗", "Я всё видел! ✨", "Мяу, так держать 🐾"];
+const SNEAK = ["Псс… 👀", "Я не подглядываю 🙈", "Ку-ку! 🐾", "*шуршит*", "Мур? Ты всё ещё читаешь?", "Анки, не выдавай меня!", "Тут кто-то есть? 👀"];
 catEl.onclick = () => {
-  const now = Date.now();
-  if (now < sulkUntil){ if (Math.random() < .35) say("Хмф 😤", 1200); return; }
-  taps = taps.filter(x => now - x < 3000); taps.push(now);
-  if (now < annoyedUntil && taps.length >= 3){   // предупредили, а всё равно тапают
-    taps = []; sulkUntil = now + 10000; annoyedUntil = 0;
-    clearTimeout(catTimer); catEl.classList.remove("happy","sad","annoyed"); catEl.classList.add("sulk");
-    say("Всё, я обиделся 😤", 3000);
-    setTimeout(() => { catEl.classList.remove("sulk"); cat("happy", "Ладно, прощаю 🐾"); }, 10000);
-    return;
-  }
-  if (taps.length >= 5){
-    taps = []; annoyedUntil = now + 4000;
-    clearTimeout(catTimer); catEl.classList.remove("happy","sad","annoyed"); void catEl.offsetWidth;
-    catEl.classList.add("annoyed"); document.querySelectorAll(".heart").forEach(h => h.remove());
-    say("Эй, ты меня загладишь! Перестань 😾", 3000);
-    catTimer = setTimeout(() => catEl.classList.remove("annoyed"), 2600);
-    return;
-  }
-  if (now < annoyedUntil) return;   // пока ворчит — на одиночные тапы не отвлекается
-  cat("happy", ["Мур~ 💗", "Мяу!", "Я Черрик 🐾", "Читай внимательно, я слежу 👀"][Math.random()*4|0]);
+  catEl.classList.remove("sad","annoyed"); catEl.classList.add("happy"); hearts();
+  say(["Мяу! Нашёл меня 🙈", "Мур~ погладили 💗", "Ой, спалился! 🐾"][Math.random()*3|0], 1800);
+  clearTimeout(peekTimer); peekTimer = setTimeout(() => { catEl.classList.remove("happy"); hide(); }, 1500);
 };
-
-// В покое раз в 4–8 секунд кот делает что-нибудь заметное, чтобы было видно, что он живой
-const IDLE = ["tilt", "twitch", "look", "flick", "wiggle"];
-(function idle(){
+// шкодит: раз в 14–30 секунд выглядывает с какого-нибудь края
+(function prowl(){
   setTimeout(() => {
-    const busy = ["happy","sad","annoyed","sulk"].some(c => catEl.classList.contains(c));
-    if (!busy && !document.hidden){
-      const a = IDLE[Math.random()*IDLE.length|0];
-      catEl.classList.add(a); setTimeout(() => catEl.classList.remove(a), 2100);
+    if (!document.hidden && !peekEl.classList.contains("on") && !document.querySelector(".intro")){
+      peek(3200 + Math.random()*2200);
+      if (Math.random() < .45) setTimeout(() => say(SNEAK[Math.random()*SNEAK.length|0], 2200), 600);
+      const IDLE = ["tilt", "twitch", "look"]; const a = IDLE[Math.random()*IDLE.length|0];
+      setTimeout(() => { catEl.classList.add(a); setTimeout(() => catEl.classList.remove(a), 2000); }, 700);
     }
-    idle();
-  }, 4000 + Math.random()*4000);
+    prowl();
+  }, 14000 + Math.random()*16000);
 })();
+
+// ---------- заставка ----------
+function intro(back){
+  const box = document.createElement("div"); box.className = "intro";
+  const catSvg = catEl.querySelector("svg").outerHTML.replace(/viewBox="[^"]*"/, 'viewBox="0 0 60 70"');
+  box.innerHTML = `<div class="duo">
+      <div class="who" id="iA"><div class="fig">${ankiEl.innerHTML}</div><div class="name">Анки</div></div>
+      <div class="who" id="iC"><div class="fig">${catSvg}</div><div class="name">Черрик</div></div></div>
+    <div class="lines" id="iL"></div>
+    <div class="load"><i id="iBar"></i></div><div class="skip">нажми, чтобы пропустить</div>`;
+  document.body.appendChild(box);
+  const lines = back
+    ? [["a","С возвращением ✓ Восстанавливаю прогресс…"], ["c","Мяу! Я скучал 🐾"]]
+    : [["a","Система запущена ✓ Привет! Я <b>Анки</b>, андроид-регистратор клана Cherry Blossoms 🌸"],
+       ["c","А я Черрик! Мур~ Буду рядом… где-нибудь 👀"], ["a","Загружаю правила и анкету…"]];
+  const T = []; const at = (ms, f) => T.push(setTimeout(f, ms));
+  at(150, () => $("#iA").classList.add("in")); at(500, () => $("#iC").classList.add("in"));
+  lines.forEach(([w, h], i) => at(700 + i*1250, () => {
+    const d = document.createElement("div"); d.className = "ln " + w; d.innerHTML = h; $("#iL").appendChild(d);
+    requestAnimationFrame(() => d.classList.add("in"));
+  }));
+  const end = 700 + lines.length*1250 + 900;
+  at(end - 1700, () => $("#iBar").style.width = "100%");
+  const close = () => { T.forEach(clearTimeout); box.classList.add("out"); setTimeout(() => box.remove(), 500);
+    setTimeout(() => peek(3000, "top"), 2500); };
+  at(end, close); box.onclick = close;
+}
 
 function go(i){ pos = i; render(); }
 backBtn.onclick = () => { if (pos >= 0) go(pos-1); };
@@ -720,7 +849,7 @@ backBtn.onclick = () => { if (pos >= 0) go(pos-1); };
 })();
 
 load(); render();
-setTimeout(() => say(reached >= 0 ? "С возвращением! 🐾" : "Привет! Я Черрик, побуду с тобой до конца анкеты 🐾", 4200), 700);
+intro(reached >= 0);
 </script>
 </body>
 </html>
