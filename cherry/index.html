@@ -783,9 +783,11 @@ ankiEl.onclick = () => {
     aTaps = []; hotUntil = 0; offUntil = now + 12000;
     clearTimeout(ankiTimer); ankiEl.classList.remove("a-ok","a-sad","a-hot"); ankiEl.classList.add("a-zap"); sparks();
     aSay("ZZZT… ⚡ К-критическая ош-ш-шибка… п-перезагрузка…", 2600);
+    setTimeout(() => catSees("annoyed", ["Анки?! Что тут случилось?! 😾", "Эй! Кто сломал Анки?! 😾", "Мяу?! Она дымится! 🙀"][Math.random()*3|0]), 2000);
     setTimeout(() => { ankiEl.classList.remove("a-zap"); ankiEl.classList.add("a-off"); }, 1600);
     setTimeout(() => { ankiEl.classList.remove("a-off"); offUntil = 0;
-      anki("ok", "Система перезапущена ✓ Больше так не делай.", 3600); }, 12000);
+      anki("ok", "Система перезапущена ✓ Больше так не делай.", 3600);
+      setTimeout(() => catSees("happy", ["Фух, живая! 💗", "Анки вернулась! Мур~ 🐾", "Ура, починилась! ✨"][Math.random()*3|0]), 1800); }, 12000);
     return;
   }
   if (aTaps.length >= 4){
@@ -827,13 +829,13 @@ function hearts(){
 }
 const HIDE = {top:"translateY(-110%) rotate(180deg)", left:"translateX(-120%) rotate(90deg)", right:"translateX(120%) rotate(-90deg)"};
 const SHOW = {top:"translateY(2%) rotate(180deg)",  left:"translateX(-4%) rotate(90deg)",  right:"translateX(4%) rotate(-90deg)"};
-function peek(ms = 4200, side){
+function peek(ms = 4200, side, y){
   clearTimeout(peekTimer);
   peekSide = side || ["top","top","left","right"][Math.random()*4|0];
   peekEl.style.transition = "none"; peekEl.classList.remove("on");
   peekEl.style.top = peekEl.style.left = peekEl.style.right = "";
   if (peekSide === "top"){ peekEl.style.top = "0"; peekEl.style.left = (14 + Math.random()*(innerWidth - 90)) + "px"; }
-  else { peekEl.style.top = (90 + Math.random()*(innerHeight*.45)) + "px"; peekEl.style[peekSide] = "-8px"; }
+  else { peekEl.style.top = (y ?? (90 + Math.random()*(innerHeight*.45))) + "px"; peekEl.style[peekSide] = "-8px"; }
   peekEl.style.transform = HIDE[peekSide]; void peekEl.offsetWidth;
   peekEl.style.transition = ""; peekEl.style.transform = SHOW[peekSide]; peekEl.classList.add("on");
   peekTimer = setTimeout(hide, ms);
@@ -846,6 +848,15 @@ function cat(mood, text){
   if (mood) catEl.classList.add(mood);
   setTimeout(() => { if (mood === "happy") hearts(); if (text) say(text, 2600); }, 450);
   clearTimeout(catTimer); catTimer = setTimeout(() => catEl.classList.remove("happy","sad"), 1600);
+}
+// Черрик выглядывает слева прямо над Анки и реагирует на то, что с ней происходит
+function catSees(mood, text){
+  if (Date.now() < sulkUntil) return;         // обижен — не выходит даже ради Анки
+  const r = ankiEl.getBoundingClientRect();
+  peek(3800, "left", Math.max(70, r.top - 120));
+  catEl.classList.remove("happy","sad","annoyed"); void catEl.offsetWidth; catEl.classList.add(mood);
+  setTimeout(() => { if (mood === "happy") hearts(); say(text, 3000); }, 450);
+  clearTimeout(catTimer); catTimer = setTimeout(() => catEl.classList.remove(mood), 3000);
 }
 const PRAISE = ["Мур, умница! 💗", "Я всё видел! ✨", "Мяу, так держать 🐾"];
 const SNEAK = ["Псс… 👀", "Я не подглядываю 🙈", "Ку-ку! 🐾", "*шуршит*", "Мур? Ты всё ещё читаешь?", "Анки, не выдавай меня!", "Тут кто-то есть? 👀"];
