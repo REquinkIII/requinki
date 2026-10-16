@@ -856,7 +856,12 @@ function catSees(mood, text){
   peek(3800, "left", Math.max(70, r.top - 120));
   catEl.classList.remove("happy","sad","annoyed"); void catEl.offsetWidth; catEl.classList.add(mood);
   setTimeout(() => { if (mood === "happy") hearts(); say(text, 3000); }, 450);
-  clearTimeout(catTimer); catTimer = setTimeout(() => catEl.classList.remove(mood), 3000);
+  clearTimeout(catTimer);
+  if (mood === "annoyed"){   // поворчал за Анки — и уходит грустный, переживает за неё
+    peek(4600, "left", Math.max(70, r.top - 120));
+    catTimer = setTimeout(() => { catEl.classList.remove("annoyed"); catEl.classList.add("sad"); }, 2300);
+    setTimeout(() => catEl.classList.remove("sad"), 5400);
+  } else catTimer = setTimeout(() => catEl.classList.remove(mood), 3000);
 }
 const PRAISE = ["Мур, умница! 💗", "Я всё видел! ✨", "Мяу, так держать 🐾"];
 const SNEAK = ["Псс… 👀", "Я не подглядываю 🙈", "Ку-ку! 🐾", "*шуршит*", "Мур? Ты всё ещё читаешь?", "Анки, не выдавай меня!", "Тут кто-то есть? 👀"];
