@@ -220,8 +220,10 @@ textarea{min-height:100px;resize:vertical}
 @keyframes ahop{40%{transform:translateY(-12px)}}
 @keyframes ashake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 @keyframes antsway{from{transform:rotate(-10deg)}to{transform:rotate(10deg)}}
-.wm{position:absolute;left:50%;bottom:9vh;width:min(52vw,240px);transform:translateX(-50%);opacity:.08;
-  filter:invert(1) drop-shadow(0 0 10px #ff4fa3)}
+.wm{position:absolute;left:50%;bottom:9vh;width:min(52vw,240px);aspect-ratio:852/1210;transform:translateX(-50%);opacity:.2;
+  background:#ff7fbf;-webkit-mask:url(raccoon.svg) center/contain no-repeat;mask:url(raccoon.svg) center/contain no-repeat;
+  filter:drop-shadow(0 0 3px #ff4fa3) drop-shadow(0 0 12px rgba(255,79,163,.85)) drop-shadow(0 0 30px rgba(255,79,163,.5))}
+.wmw{position:absolute;inset:0;filter:drop-shadow(0 0 3px #ff4fa3) drop-shadow(0 0 14px rgba(255,79,163,.8))}
 .abubble{position:fixed;left:max(14px,calc(50% - 266px));bottom:calc(132px + env(safe-area-inset-bottom));z-index:7;max-width:230px;
   background:#160714;border:1px solid var(--violet);border-radius:14px 14px 14px 4px;padding:7px 11px;font:13px/1.4 var(--mono);color:#f3e8ff;
   box-shadow:0 0 12px rgba(176,123,255,.45);opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;pointer-events:none}
@@ -728,8 +730,7 @@ function renderDone(s){
 }
 
 // ---------- водяной знак: енот-R (логотип REquinki) ----------
-{ const wm = new Image(); wm.className = "wm"; wm.alt = ""; wm.src = "raccoon.svg";
-  wm.onerror = () => wm.remove(); $("#bg").appendChild(wm); }
+{ const w = document.createElement("div"); w.className = "wmw"; w.innerHTML = '<div class="wm"></div>'; $("#bg").appendChild(w); }
 
 // ---------- клавиатура ----------
 const typing = () => document.body.classList.contains("typing");
