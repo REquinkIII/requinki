@@ -199,6 +199,19 @@ textarea{min-height:100px;resize:vertical}
 .anki.a-sad .ant{animation:none;transform:rotate(24deg)}
 .anki.a-ok{animation:ahop .5s ease-out 2}
 .anki.a-sad{animation:asigh 1.2s ease-in-out}
+.anki .e-zap{opacity:0}
+.anki.a-hot{animation:ashake .3s ease-in-out infinite}
+.anki.a-hot svg{animation:ahot .3s steps(2) infinite}
+@keyframes ahot{50%{filter:drop-shadow(0 0 3px #ff7a3b) drop-shadow(0 0 14px rgba(255,110,40,.95))}}
+.anki.a-zap{animation:aglitch .16s steps(2) infinite}
+.anki.a-zap svg{animation:aflick .45s steps(3) infinite}
+.anki.a-zap .e-norm,.anki.a-zap .e-ok,.anki.a-zap .e-sad,.anki.a-off .e-norm,.anki.a-off .e-ok{opacity:0}
+.anki.a-zap .e-zap,.anki.a-off .e-zap{opacity:1}
+.anki.a-off{animation:none;opacity:.35;filter:grayscale(1)}
+.anki.a-off .ant{animation:none;transform:rotate(30deg)}
+@keyframes aglitch{25%{transform:translate(-3px,1px) skewX(9deg)}50%{transform:translate(2px,-2px)}75%{transform:translate(3px,2px) skewX(-7deg)}}
+@keyframes aflick{33%{opacity:.25}66%{opacity:.9;filter:hue-rotate(170deg) drop-shadow(0 0 6px #9fd8ff)}}
+.spark{position:fixed;z-index:8;pointer-events:none;color:#ffe066;font-size:15px;text-shadow:0 0 8px #ffd23f;animation:float .9s ease-out forwards}
 @keyframes adrip{from{transform:translateY(0)}to{transform:translateY(6px);opacity:0}}
 @keyframes asigh{30%{transform:translateY(3px)}}
 .anki .ant{transform-box:fill-box;transform-origin:50% 100%;animation:antsway 2.8s ease-in-out infinite alternate}
@@ -207,6 +220,8 @@ textarea{min-height:100px;resize:vertical}
 @keyframes ahop{40%{transform:translateY(-12px)}}
 @keyframes ashake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 @keyframes antsway{from{transform:rotate(-10deg)}to{transform:rotate(10deg)}}
+.wm{position:absolute;left:50%;bottom:9vh;width:min(52vw,240px);transform:translateX(-50%);opacity:.08;
+  filter:invert(1) drop-shadow(0 0 10px #ff4fa3)}
 .abubble{position:fixed;left:max(14px,calc(50% - 266px));bottom:calc(132px + env(safe-area-inset-bottom));z-index:7;max-width:230px;
   background:#160714;border:1px solid var(--violet);border-radius:14px 14px 14px 4px;padding:7px 11px;font:13px/1.4 var(--mono);color:#f3e8ff;
   box-shadow:0 0 12px rgba(176,123,255,.45);opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;pointer-events:none}
@@ -232,7 +247,7 @@ textarea{min-height:100px;resize:vertical}
 .intro .fig path,.intro .fig rect,.intro .fig line{fill:none;stroke:#ffd0e6;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .intro .fig .scr{fill:rgba(255,79,163,.16)}.intro .fig .fl{fill:#ff4fa3;stroke:none}.intro .fig .cheek{fill:rgba(255,79,163,.6);stroke:none}
 .intro .fig .eyes circle{fill:#ff4fa3;stroke:none}
-.intro .fig .e-ok,.intro .fig .e-sad,.intro .fig .tearA,.intro .fig .m-sad,.intro .fig .happyEyes,.intro .fig .sadEyes,.intro .fig .tear,.intro .fig .angryEyes{display:none}
+.intro .fig .e-ok,.intro .fig .e-sad,.intro .fig .e-zap,.intro .fig .tearA,.intro .fig .m-sad,.intro .fig .happyEyes,.intro .fig .sadEyes,.intro .fig .tear,.intro .fig .angryEyes{display:none}
 .intro .name{font:600 12px var(--mono);letter-spacing:.2em;color:var(--neon2);text-transform:uppercase}
 .intro .lines{min-height:96px;max-width:330px;width:100%;display:flex;flex-direction:column;gap:8px}
 .intro .ln{padding:8px 12px;border-radius:14px;font-size:14px;line-height:1.4;opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s}
@@ -242,7 +257,7 @@ textarea{min-height:100px;resize:vertical}
 .intro .load{width:220px;height:4px;border-radius:4px;background:rgba(255,79,163,.15);overflow:hidden}
 .intro .load i{display:block;height:100%;width:0;background:var(--neon);box-shadow:0 0 10px var(--neon);transition:width 1.6s ease-in-out}
 .intro .skip{font:12px var(--mono);color:var(--soft)}
-body.typing .anki,body.typing .abubble,body.typing .peek,body.typing .bubble{opacity:0!important;pointer-events:none!important;transition:opacity .2s}
+body.typing .abubble,body.typing .bubble{opacity:0!important;transition:opacity .2s}
 @media (prefers-reduced-motion:reduce){.anki,.anki *,.peek{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -262,6 +277,7 @@ body.typing .anki,body.typing .abubble,body.typing .peek,body.typing .bubble{opa
   <path class="e-norm" d="M20.5 29.5 Q23.5 26 26.5 29.5 M33.5 29.5 Q36.5 26 39.5 29.5"/>
   <path class="e-ok" d="M20.5 30 Q23.5 25 26.5 30 M33.5 30 Q36.5 25 39.5 30"/>
   <path class="e-sad" d="M20.5 27 Q23.5 30.5 26.5 28.5 M33.5 28.5 Q36.5 30.5 39.5 27"/>
+  <path class="e-zap" d="M21 26.5 L26 31.5 M26 26.5 L21 31.5 M34 26.5 L39 31.5 M39 26.5 L34 31.5"/>
   <ellipse class="tearA" cx="22" cy="33" rx="1.3" ry="1.8"/>
   <ellipse class="cheek" cx="19" cy="34" rx="2.6" ry="1.5"/><ellipse class="cheek" cx="41" cy="34" rx="2.6" ry="1.5"/>
   <path class="m-norm" d="M27 34.5 Q30 37 33 34.5"/><path class="m-sad" d="M27 36 Q30 33.5 33 36"/>
@@ -711,6 +727,10 @@ function renderDone(s){
   };
 }
 
+// ---------- водяной знак: енот-R (логотип REquinki) ----------
+{ const wm = new Image(); wm.className = "wm"; wm.alt = ""; wm.src = "raccoon.svg";
+  wm.onerror = () => wm.remove(); $("#bg").appendChild(wm); }
+
 // ---------- клавиатура ----------
 const typing = () => document.body.classList.contains("typing");
 document.addEventListener("focusin", e => { if (e.target.matches("input:not([type=checkbox]):not([type=file]),textarea")) document.body.classList.add("typing"); });
@@ -721,7 +741,9 @@ document.addEventListener("focusout", () => setTimeout(() => {
 // ---------- Анки ----------
 const ankiEl = $("#anki"), aBubbleEl = $("#abubble");
 let ankiTimer = null, aBubbleTimer = null;
+let aTaps = [], hotUntil = 0, offUntil = 0;
 function anki(mood, html, ms = 3200){
+  if (Date.now() < offUntil) return;        // перезагружается — молчит
   ankiEl.classList.remove("a-ok","a-sad"); void ankiEl.offsetWidth;
   if (mood) ankiEl.classList.add("a-" + mood);
   clearTimeout(ankiTimer); ankiTimer = setTimeout(() => ankiEl.classList.remove("a-ok","a-sad"), mood === "sad" ? 3400 : 1400);
@@ -741,7 +763,39 @@ function ankiHint(s){
   if (hinted.has(pos) || !ANKI_HINT[s.type]) return;
   hinted.add(pos); setTimeout(() => anki(null, ANKI_HINT[s.type], 4200), 500);
 }
+function aSay(html, ms){ aBubbleEl.innerHTML = html; aBubbleEl.classList.add("on");
+  clearTimeout(aBubbleTimer); aBubbleTimer = setTimeout(() => aBubbleEl.classList.remove("on"), ms); }
+function sparks(){
+  const r = ankiEl.getBoundingClientRect();
+  for (let i=0;i<6;i++){
+    const h = document.createElement("div"); h.className = "spark"; h.textContent = "⚡";
+    h.style.left = (r.left + r.width/2 - 6 + (Math.random()-.5)*36) + "px"; h.style.top = (r.top + 8 + Math.random()*20) + "px";
+    h.style.setProperty("--dx", ((Math.random()-.5)*70).toFixed(0) + "px"); h.style.animationDelay = (i*.08) + "s";
+    document.body.appendChild(h); setTimeout(() => h.remove(), 1300);
+  }
+}
+// Тапы: один — подсказка; 4 за 3 секунды — перегрев; тапнули ещё — короткое замыкание и перезагрузка
 ankiEl.onclick = () => {
+  const now = Date.now();
+  if (now < offUntil) return;
+  aTaps = aTaps.filter(x => now - x < 3000); aTaps.push(now);
+  if (now < hotUntil && aTaps.length >= 2){
+    aTaps = []; hotUntil = 0; offUntil = now + 12000;
+    clearTimeout(ankiTimer); ankiEl.classList.remove("a-ok","a-sad","a-hot"); ankiEl.classList.add("a-zap"); sparks();
+    aSay("ZZZT… ⚡ К-критическая ош-ш-шибка… п-перезагрузка…", 2600);
+    setTimeout(() => { ankiEl.classList.remove("a-zap"); ankiEl.classList.add("a-off"); }, 1600);
+    setTimeout(() => { ankiEl.classList.remove("a-off"); offUntil = 0;
+      anki("ok", "Система перезапущена ✓ Больше так не делай.", 3600); }, 12000);
+    return;
+  }
+  if (aTaps.length >= 4){
+    aTaps = []; hotUntil = now + 4000;
+    clearTimeout(ankiTimer); ankiEl.classList.remove("a-ok","a-sad"); ankiEl.classList.add("a-hot");
+    aSay("Ты сейчас разогреешь мои микросхемы и я заглючу, давай переставай 🔥", 3800);
+    ankiTimer = setTimeout(() => ankiEl.classList.remove("a-hot"), 3000);
+    return;
+  }
+  if (now < hotUntil) return;
   const s = pos >= 0 ? STEPS[pos] : null;
   anki("ok", s && ANKI_HINT[s.type] ? ANKI_HINT[s.type] : "Я Анки, андроид-регистратор клана 🌸 Нажимай «Начать».", 4200);
 };
@@ -752,6 +806,7 @@ const peekEl = document.createElement("div"); peekEl.className = "peek"; documen
 catEl.querySelector("svg").setAttribute("viewBox", "6 2 50 38");     // только морда: тело и хвост за краем
 let catTimer = null, bubbleTimer = null, peekTimer = null, peekSide = null;
 function say(text, ms = 2600){
+  if (typing()) return;            // пока печатают — Черрик выглядывает молча
   bubbleEl.textContent = text; bubbleEl.classList.add("on", "free");
   const r = peekEl.getBoundingClientRect(), W = innerWidth, H = innerHeight, bw = Math.min(210, W - 28);
   let x = r.left + r.width/2 - bw/2, y = r.bottom + 8;
@@ -785,7 +840,7 @@ function peek(ms = 4200, side){
 }
 function hide(){ clearTimeout(peekTimer); if (peekSide) peekEl.style.transform = HIDE[peekSide]; peekEl.classList.remove("on"); bubbleEl.classList.remove("on"); }
 function cat(mood, text){
-  if (Date.now() < sulkUntil || typing()) return;   // обиженный — не выглядывает даже порадоваться
+  if (Date.now() < sulkUntil) return;   // обиженный — не выглядывает даже порадоваться
   peek(3600);
   catEl.classList.remove("happy","sad","annoyed"); void catEl.offsetWidth;
   if (mood) catEl.classList.add(mood);
@@ -827,7 +882,7 @@ let forgive = false;
 (function prowl(){
   setTimeout(() => {
     const now = Date.now();
-    if (now >= sulkUntil && !typing() && !document.hidden && !peekEl.classList.contains("on") && !document.querySelector(".intro")){
+    if (now >= sulkUntil && !document.hidden && !peekEl.classList.contains("on") && !document.querySelector(".intro")){
       peek(3200 + Math.random()*2200);
       if (forgive){ forgive = false; setTimeout(() => say("Ладно, прощаю 🐾", 2200), 600); }
       else if (Math.random() < .45) setTimeout(() => say(SNEAK[Math.random()*SNEAK.length|0], 2200), 600);
