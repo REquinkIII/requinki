@@ -771,6 +771,7 @@ function peek(ms = 4200, side){
 }
 function hide(){ clearTimeout(peekTimer); if (peekSide) peekEl.style.transform = HIDE[peekSide]; peekEl.classList.remove("on"); bubbleEl.classList.remove("on"); }
 function cat(mood, text){
+  if (Date.now() < sulkUntil) return;   // обиженный — не выглядывает даже порадоваться
   peek(3600);
   catEl.classList.remove("happy","sad","annoyed"); void catEl.offsetWidth;
   if (mood) catEl.classList.add(mood);
@@ -779,22 +780,48 @@ function cat(mood, text){
 }
 const PRAISE = ["Мур, умница! 💗", "Я всё видел! ✨", "Мяу, так держать 🐾"];
 const SNEAK = ["Псс… 👀", "Я не подглядываю 🙈", "Ку-ку! 🐾", "*шуршит*", "Мур? Ты всё ещё читаешь?", "Анки, не выдавай меня!", "Тут кто-то есть? 👀"];
+// Тапы: первый — радуется и прячется; затискали (3+ тапа за 3 с) — мотает головой и ворчит;
+// продолжили тапать — обижается, удирает и минуту не показывается
+let taps = [], annoyedUntil = 0, sulkUntil = 0, leaving = false;
 catEl.onclick = () => {
+  const now = Date.now();
+  if (now < sulkUntil) return;
+  taps = taps.filter(x => now - x < 3000); taps.push(now);
+  if (now < annoyedUntil && taps.length >= 2){
+    taps = []; annoyedUntil = 0; sulkUntil = now + 60000; leaving = true;
+    catEl.classList.remove("happy","annoyed"); catEl.classList.add("sulk");
+    say("Всё, я обиделся 😤", 1800);
+    clearTimeout(peekTimer); peekTimer = setTimeout(() => { hide(); catEl.classList.remove("sulk"); leaving = false; }, 1400);
+    return;
+  }
+  if (taps.length >= 3){
+    taps = []; annoyedUntil = now + 4000; leaving = true;
+    catEl.classList.remove("happy"); void catEl.offsetWidth; catEl.classList.add("annoyed");
+    document.querySelectorAll(".heart").forEach(h => h.remove());
+    say("Эй, ты меня загладишь! Перестань 😾", 2600);
+    clearTimeout(peekTimer); peekTimer = setTimeout(() => { catEl.classList.remove("annoyed"); hide(); leaving = false; }, 2600);
+    return;
+  }
+  if (leaving) return;            // уже прячется — повторные тапы не перезапускают анимацию
+  leaving = true;
   catEl.classList.remove("sad","annoyed"); catEl.classList.add("happy"); hearts();
   say(["Мяу! Нашёл меня 🙈", "Мур~ погладили 💗", "Ой, спалился! 🐾"][Math.random()*3|0], 1800);
-  clearTimeout(peekTimer); peekTimer = setTimeout(() => { catEl.classList.remove("happy"); hide(); }, 1500);
+  clearTimeout(peekTimer); peekTimer = setTimeout(() => { catEl.classList.remove("happy"); hide(); leaving = false; }, 1800);
 };
-// шкодит: раз в 14–30 секунд выглядывает с какого-нибудь края
+// шкодит: выглядывает редко — раз в 45–90 секунд; после обиды минуту не появляется, потом мирится
+let forgive = false;
 (function prowl(){
   setTimeout(() => {
-    if (!document.hidden && !peekEl.classList.contains("on") && !document.querySelector(".intro")){
+    const now = Date.now();
+    if (now >= sulkUntil && !document.hidden && !peekEl.classList.contains("on") && !document.querySelector(".intro")){
       peek(3200 + Math.random()*2200);
-      if (Math.random() < .45) setTimeout(() => say(SNEAK[Math.random()*SNEAK.length|0], 2200), 600);
+      if (forgive){ forgive = false; setTimeout(() => say("Ладно, прощаю 🐾", 2200), 600); }
+      else if (Math.random() < .45) setTimeout(() => say(SNEAK[Math.random()*SNEAK.length|0], 2200), 600);
       const IDLE = ["tilt", "twitch", "look"]; const a = IDLE[Math.random()*IDLE.length|0];
       setTimeout(() => { catEl.classList.add(a); setTimeout(() => catEl.classList.remove(a), 2000); }, 700);
-    }
+    } else if (now < sulkUntil) forgive = true;
     prowl();
-  }, 14000 + Math.random()*16000);
+  }, 45000 + Math.random()*45000);
 })();
 
 // ---------- заставка ----------
