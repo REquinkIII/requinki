@@ -165,7 +165,10 @@
   }
   .work .thumb img { object-position: top; }
   .gal { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; }
-  .gal img { flex: 0 0 78%; width: 78%; scroll-snap-align: center; }
+  /* align-items: flex-start — иначе флекс растягивает все скрины до высоты самого длинного */
+  .gal { align-items: flex-start; }
+  .modal .gal img { flex: 0 0 78%; width: 78%; height: auto; max-height: 75vh; object-fit: contain;
+                    object-position: top; background: #000; scroll-snap-align: center; }
   .gal-hint { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: right; margin-top: 4px; }
   .work .cap { padding: 8px 10px; font-size: 13px; }
   .work .cap small { display: block; color: var(--muted); font-family: var(--mono); font-size: 10px; }
