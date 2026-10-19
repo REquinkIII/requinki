@@ -485,6 +485,13 @@ const haptic = (t) => { try { tg && tg.HapticFeedback.selectionChanged(); } catc
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return finish();
   addEventListener("pointerdown", finish);
 
+  // ждём картинку логотипа: пока она не загрузилась, у неё нулевая ширина и всё считается неправильно
+  try { await img.decode(); } catch (e) {}
+  if (!img.naturalWidth) await new Promise(r => { img.onload = img.onerror = r; setTimeout(r, 3000); });
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));   // Telegram успевает развернуть окно
+  if (done) return;
+  if (!img.getBoundingClientRect().width) return finish();
+
   // шапку — в центр экрана (без анимации), и запоминаем, где окажется логотип
   hero.style.transition = "none";
   hero.style.transform = "none";
@@ -518,7 +525,9 @@ const haptic = (t) => { try { tg && tg.HapticFeedback.selectionChanged(); } catc
     const isEye = m && Math.abs(m[1] - VW * .5) < 40 && Math.abs(m[2] - VH * .216) < 30 && p.getAttribute("d").length < 5000;
     $(isEye ? "eyeIn" : "body").appendChild(document.importNode(p, true));
   });
-  const eb = $("eyeG").getBBox();
+  let eb;
+  try { eb = $("eyeG").getBBox(); } catch (e) { return finish(); }
+  if (!eb.width || !L.width) return finish();          // что-то пошло не так — сразу показываем приложение
   const ecx = eb.x + eb.width / 2, ecy = eb.y + eb.height / 2;
 
   // кадры: f — сколько экранных пикселей в одной единице логотипа
