@@ -115,8 +115,31 @@
   }
   .type.busy .typed::after { animation: none; }   /* пока печатает — курсор горит ровно */
   @keyframes caret { 50% { opacity: 0; } }
-  .intro { opacity: 0; transform: translateY(6px); transition: opacity .6s ease, transform .6s ease; }
-  .intro.shown { opacity: 1; transform: none; }
+
+  /* ===== заставка при входе =====
+     s1 — светится только глаз, s2 — енот обрисовывается по кругу, s3 — печатается ник,
+     s4 — подпись и «маска»; потом класс intro снимается и шапка уезжает на место. */
+  @property --sweep { syntax: "<angle>"; inherits: false; initial-value: 360deg; }
+  .logo { position: relative; display: inline-block; line-height: 0; }
+  .logo .eye { position: absolute; left: 0; top: 0; opacity: 0; clip-path: ellipse(11% 4% at 52% 21.8%);
+               filter: drop-shadow(0 0 6px #7fa8ff) drop-shadow(0 0 14px #3d7bff); }
+  .logo .full { -webkit-mask: conic-gradient(from 200deg at 52% 22%, #000 var(--sweep), transparent 0);
+                        mask: conic-gradient(from 200deg at 52% 22%, #000 var(--sweep), transparent 0); }
+  body.intro .logo .full { --sweep: 0deg; }
+  body.intro.s1 .logo .eye { opacity: 1; transition: opacity .5s; animation: blink .25s 0.75s; }
+  .logo .eye { transform-origin: 52% 21.8%; }
+  @keyframes blink { 50% { transform: scaleY(.1); } }
+  body.intro.s2 .logo .full { --sweep: 360deg; transition: --sweep 1.2s cubic-bezier(.6,.05,.35,1); }
+  body.intro:not(.s3) .type .typed::after { visibility: hidden; }
+  body.intro:not(.s4) .tagline, body.intro:not(.s4) .mask { opacity: 0; transform: translateY(6px); }
+  .tagline, .mask { transition: opacity .6s ease, transform .6s ease; }
+
+  .hero { transition: transform .8s cubic-bezier(.6,.05,.25,1); }
+  body.intro .hero { transform: translateY(var(--dy, 30vh)) scale(1.2); }
+  .hud-top, section, nav, .foot, .film { transition: opacity .7s ease .25s, transform .7s ease .25s; }
+  body.intro .hud-top, body.intro section, body.intro .foot, body.intro .film { opacity: 0; }
+  body.intro nav { opacity: 0; transform: translateY(100%); }
+  body.intro { overflow: hidden; }
   .glitch { animation: glitch 6s infinite steps(1); }
   @keyframes glitch {
     0%, 96%, 100% { transform: none; text-shadow: 0 0 18px rgba(61,123,255,.55); }
@@ -247,16 +270,16 @@
   .foot { text-align: center; margin-top: 30px; }
 </style>
 </head>
-<body>
+<body class="intro">
 <div class="bg"><div class="film f1"></div><div class="film f2"></div></div>
 
 <div class="wrap">
   <div class="hud hud-top"><span>//requinki.exe</span><span>mood: <b>grumpy</b> · status: <b>online</b></span></div>
 
-  <div class="hero">
-    <h1 class="glitch"><img src="img/logo-raccoon.svg" alt=""><span class="type" aria-label="REquinki"><span class="ghost">REquinki</span><span class="typed" id="typed"></span></span></h1>
-    <p class="tagline intro">моушн · 3D · Roblox-графика · Telegram-боты и сайты</p>
-    <div class="mask intro">keep your masks on</div>
+  <div class="hero" id="hero">
+    <h1 class="glitch"><span class="logo"><img class="full" src="img/logo-raccoon.svg" alt=""><img class="eye" src="img/logo-raccoon.svg" alt=""></span><span class="type" aria-label="REquinki"><span class="ghost">REquinki</span><span class="typed" id="typed"></span></span></h1>
+    <p class="tagline">моушн · 3D · Roblox-графика · Telegram-боты и сайты</p>
+    <div class="mask">keep your masks on</div>
   </div>
 
   <!-- ===== УСЛУГИ ===== -->
@@ -441,18 +464,48 @@ const tg = window.Telegram ? window.Telegram.WebApp : null;
 if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor("#020203"); tg.setBackgroundColor("#020203"); tg.BackButton.hide(); } catch (e) {} }
 const haptic = (t) => { try { tg && tg.HapticFeedback.selectionChanged(); } catch (e) {} };
 
-// --- печать ника в шапке ---
-(function typeNick() {
-  const text = "REquinki", el = document.getElementById("typed"), box = el.parentElement;
-  const showRest = () => document.querySelectorAll(".intro").forEach((e, i) => setTimeout(() => e.classList.add("shown"), i * 250));
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = text; showRest(); return; }
-  box.classList.add("busy");
-  let i = 0;
-  setTimeout(function step() {
-    el.textContent = text.slice(0, ++i);
-    if (i < text.length) setTimeout(step, 140 + Math.random() * 120);   // неровный темп — как живой человек
-    else { box.classList.remove("busy"); setTimeout(showRest, 250); }
-  }, 1100);
+// --- заставка: глаз → енот → ник → подпись → приложение. Тап — пропустить ---
+(function intro() {
+  const body = document.body, hero = document.getElementById("hero");
+  const text = "REquinki", typed = document.getElementById("typed");
+  const timers = [];
+  const later = (ms, f) => timers.push(setTimeout(f, ms));
+  let done = false;
+
+  function finish() {
+    if (done) return; done = true;
+    timers.forEach(clearTimeout);
+    typed.textContent = text;
+    typed.parentElement.classList.remove("busy");
+    body.classList.add("s1", "s2", "s3", "s4");
+    requestAnimationFrame(() => body.classList.remove("intro"));
+    removeEventListener("pointerdown", finish);
+  }
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { finish(); return; }
+
+  // шапку ставим по центру экрана, потом она поедет на своё место
+  hero.style.transform = "none";                  // меряем без сдвига заставки
+  const r = hero.getBoundingClientRect();
+  hero.style.transform = "";
+  hero.style.setProperty("--dy", (innerHeight / 2 - (r.top + r.height / 2)) + "px");
+  addEventListener("pointerdown", finish);
+
+  later(250, () => body.classList.add("s1"));                 // глаз
+  later(1150, () => body.classList.add("s2"));                // обводка
+  later(2350, () => {                                         // ник
+    body.classList.add("s3");
+    typed.parentElement.classList.add("busy");
+    let i = 0;
+    later(350, function step() {
+      typed.textContent = text.slice(0, ++i);
+      if (i < text.length) later(110 + Math.random() * 100, step);   // неровный темп, как живой человек
+      else {
+        typed.parentElement.classList.remove("busy");
+        later(250, () => body.classList.add("s4"));           // подпись и «маска»
+        later(1100, finish);                                  // приложение
+      }
+    });
+  });
 })();
 
 const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
