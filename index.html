@@ -10,10 +10,11 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #04060d;
-    --bg2: #070b1a;
-    --card: rgba(14, 22, 52, .55);
-    --line: rgba(80, 130, 255, .22);
+    --bg: #020203;
+    --bg2: #07080c;
+    --card: rgba(8, 9, 14, .82);
+    --line: rgba(80, 130, 255, .2);
+    --stripes: repeating-linear-gradient(90deg, var(--neon) 0 14px, #020203 14px 24px);
     --neon: #3d7bff;
     --neon2: #7fa8ff;
     --text: #dfe6ff;
@@ -36,16 +37,21 @@
   .bg::before {
     content: ""; position: absolute; inset: 0;
     background:
-      radial-gradient(circle at 50% 18%, rgba(40, 80, 220, .28), transparent 55%),
-      linear-gradient(rgba(80,130,255,.05) 1px, transparent 1px) 0 0 / 28px 28px,
-      linear-gradient(90deg, rgba(80,130,255,.05) 1px, transparent 1px) 0 0 / 28px 28px;
+      radial-gradient(ellipse at 50% 12%, rgba(40, 80, 220, .26), transparent 50%),
+      radial-gradient(ellipse at 100% 100%, rgba(30, 60, 180, .12), transparent 45%),
+      linear-gradient(rgba(80,130,255,.035) 1px, transparent 1px) 0 0 / 28px 28px,
+      linear-gradient(90deg, rgba(80,130,255,.035) 1px, transparent 1px) 0 0 / 28px 28px;
+  }
+  .bg::after {   /* «шерсть»: шум поверх всего фона */
+    content: ""; position: absolute; inset: 0; opacity: .09; mix-blend-mode: screen;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .65 0 0 0 0 1 0 0 0 1.4 -.4'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   }
   .film {
     position: absolute; width: 160%; height: 46px; left: -30%;
     background:
-      repeating-linear-gradient(90deg, transparent 0 6px, rgba(4,6,13,.9) 6px 14px) top / 100% 7px no-repeat,
-      repeating-linear-gradient(90deg, transparent 0 6px, rgba(4,6,13,.9) 6px 14px) bottom / 100% 7px no-repeat,
-      repeating-linear-gradient(90deg, rgba(20,34,80,.55) 0 58px, rgba(4,6,13,.8) 58px 62px);
+      repeating-linear-gradient(90deg, transparent 0 6px, rgba(2,2,3,.95) 6px 14px) top / 100% 7px no-repeat,
+      repeating-linear-gradient(90deg, transparent 0 6px, rgba(2,2,3,.95) 6px 14px) bottom / 100% 7px no-repeat,
+      repeating-linear-gradient(90deg, rgba(18,30,72,.6) 0 58px, rgba(2,2,3,.9) 58px 62px);
     border-top: 1px solid rgba(110,150,255,.35); border-bottom: 1px solid rgba(110,150,255,.35);
     opacity: .45;
   }
@@ -66,9 +72,18 @@
     border: 2px solid var(--neon); box-shadow: var(--glow), inset 0 0 18px rgba(61,123,255,.5);
     padding: 6px; position: relative;
   }
-  .ring::after {
-    content: ""; position: absolute; inset: -12px; border-radius: 50%;
-    border: 1px dashed rgba(127,168,255,.35); animation: spin 40s linear infinite;
+  .ring::after {   /* полосатый хвост вокруг аватарки */
+    content: ""; position: absolute; inset: -14px; border-radius: 50%;
+    background: repeating-conic-gradient(var(--neon) 0 9deg, transparent 9deg 18deg);
+    -webkit-mask: radial-gradient(circle, transparent 67%, #000 68.5%, #000 74%, transparent 75.5%);
+            mask: radial-gradient(circle, transparent 67%, #000 68.5%, #000 74%, transparent 75.5%);
+    opacity: .85; animation: spin 60s linear infinite;
+  }
+  .mask {   /* «маска енота» — чёрная полоса с подписью */
+    margin: 14px -16px 0; padding: 7px 16px; background: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--neon2);
+    text-shadow: 0 0 8px rgba(61,123,255,.7);
   }
   .ring img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -95,12 +110,17 @@
     text-transform: uppercase; letter-spacing: .12em; margin: 26px 0 12px;
     display: flex; align-items: center; gap: 10px;
   }
+  h2::before { content: ""; width: 34px; height: 6px; flex: none; background: var(--stripes); border-radius: 2px;
+               box-shadow: 0 0 8px rgba(61,123,255,.5); }
   h2::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--line), transparent); }
 
   .card {
     background: var(--card); border: 1px solid var(--line); border-radius: 14px;
-    padding: 16px; margin-bottom: 12px; backdrop-filter: blur(6px);
+    padding: 16px; margin-bottom: 12px; backdrop-filter: blur(6px); position: relative; overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(127,168,255,.25), 0 10px 30px rgba(0,0,0,.6);
   }
+  .card::before { content: ""; position: absolute; left: 16px; right: 16px; top: 0; height: 1px;
+                  background: linear-gradient(90deg, transparent, var(--neon), transparent); opacity: .8; }
   .card h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
   .card p { margin: 0; color: var(--muted); font-size: 14px; }
   .price { font-family: var(--mono); color: var(--neon2); font-weight: 600; white-space: nowrap; }
@@ -117,8 +137,10 @@
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .work {
     border-radius: 12px; overflow: hidden; border: 1px solid var(--line);
-    background: var(--bg2); cursor: pointer; position: relative;
+    background: var(--bg2); cursor: pointer; position: relative; transition: border-color .2s, box-shadow .2s;
   }
+  .work:active { border-color: var(--neon); box-shadow: 0 0 14px rgba(61,123,255,.45); }
+  .work .cap { border-top: 1px solid var(--line); }
   .work .thumb { aspect-ratio: 1; display: grid; place-items: center; overflow: hidden; }
   .work .thumb img, .work .thumb video { width: 100%; height: 100%; object-fit: cover; display: block; }
   .work .ph {
@@ -138,7 +160,7 @@
   .work .cap { padding: 8px 10px; font-size: 13px; }
   .work .cap small { display: block; color: var(--muted); font-family: var(--mono); font-size: 10px; }
   .modal {
-    position: fixed; inset: 0; background: rgba(2,3,8,.92); z-index: 20; display: none;
+    position: fixed; inset: 0; background: rgba(0,0,0,.94); z-index: 20; display: none;
     padding: 20px 16px; overflow: auto;
   }
   .modal.on { display: block; }
@@ -151,14 +173,14 @@
   label { display: block; font-family: var(--mono); font-size: 11px; color: var(--muted);
           text-transform: uppercase; letter-spacing: .08em; margin: 14px 0 6px; }
   input, select, textarea {
-    width: 100%; background: rgba(7,11,26,.85); color: var(--text); font: inherit;
+    width: 100%; background: #050608; color: var(--text); font: inherit;
     border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; outline: none;
   }
   input:focus, select:focus, textarea:focus { border-color: var(--neon); box-shadow: 0 0 0 3px rgba(61,123,255,.2); }
   textarea { min-height: 110px; resize: vertical; }
   .btn {
     display: block; width: 100%; margin-top: 18px; padding: 14px; border: 0; border-radius: 12px;
-    background: var(--neon); color: #fff; font: 600 15px Inter, sans-serif; cursor: pointer;
+    background: var(--neon); color: #02030a; font: 700 15px Inter, sans-serif; cursor: pointer; letter-spacing: .02em;
     box-shadow: var(--glow);
   }
   .btn:active { transform: scale(.98); }
@@ -180,7 +202,7 @@
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
     display: flex; justify-content: center; gap: 4px;
     padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
-    background: rgba(4,6,13,.88); border-top: 1px solid var(--line); backdrop-filter: blur(10px);
+    background: rgba(0,0,0,.9); border-top: 1px solid var(--line); backdrop-filter: blur(10px);
   }
   nav button {
     flex: 1; max-width: 130px; background: none; border: 0; color: var(--muted); cursor: pointer;
@@ -188,7 +210,10 @@
     display: flex; flex-direction: column; align-items: center; gap: 3px;
   }
   nav button svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.7; }
-  nav button.on { color: var(--neon2); background: rgba(61,123,255,.12); }
+  nav button { position: relative; }
+  nav button.on { color: var(--neon2); background: rgba(61,123,255,.08); }
+  nav button.on::after { content: ""; position: absolute; left: 30%; right: 30%; bottom: 0; height: 3px;
+                         background: var(--stripes); background-size: 12px 100%; border-radius: 2px; }
   nav button.on svg { filter: drop-shadow(0 0 6px rgba(61,123,255,.8)); }
 
   .foot { text-align: center; margin-top: 30px; }
@@ -198,12 +223,13 @@
 <div class="bg"><div class="film f1"></div><div class="film f2"></div></div>
 
 <div class="wrap">
-  <div class="hud hud-top"><span>//requinki.exe</span><span>status: <b>online</b></span></div>
+  <div class="hud hud-top"><span>//requinki.exe</span><span>mood: <b>grumpy</b> · status: <b>online</b></span></div>
 
   <div class="hero">
     <div class="ring"><img src="img/avatar-raccoon.jpg" alt="REquinki"></div>
     <h1 class="glitch"><img src="img/logo-raccoon.svg" alt="">REquinki</h1>
     <p class="tagline">моушн · 3D · Roblox-графика · Telegram-боты и сайты</p>
+    <div class="mask">keep your masks on</div>
   </div>
 
   <!-- ===== УСЛУГИ ===== -->
@@ -252,7 +278,7 @@
     <div class="links" id="links"></div>
   </section>
 
-  <div class="hud foot">keep your masks on.<br>//identity.exe</div>
+  <div class="hud foot">// енот на связи, но не всегда рад 🦝<br>//identity.exe</div>
 </div>
 
 <div class="modal" id="modal" onclick="if(event.target===this)closeWork()">
@@ -357,11 +383,10 @@ const SERVICES = [
 const WORKS = [
   { title: "Аватарка для TikTok", tag: "позинг", img: "img/avatar.jpg",
     desc: "Позинг: персонаж поставлен в позу в Blender, потом обработан и собран в единую композицию: неон, плёнка, глитч." },
-  { title: "Бот-маскот для чата клана", tag: "telegram-бот · сервер 24/7", img: "img/mascot-2.jpg",
-    imgs: ["img/mascot-1.jpg", "img/mascot-2.jpg", "img/mascot-3.jpg"],
-    desc: "Живой кот-маскот игрового сообщества. Сам созывает на съёмки по расписанию, отвечает на «когда съёмки?», ведёт явку: берёт отметки из голосового канала Discord, админы проверяют их кнопками, и бот записывает их в Excel-таблицу, а потом сообщает о трёх пропусках подряд и поздравляет за серии. Для участников — фарм и рюкзак с приватными сообщениями, кормёжка и дружба, викторины, вопрос дня, цитатник, сезонные фразы и праздники, анонимные обращения к админам. Работает на своём сервере как служба, с автоперезапуском, ночными бэкапами и уведомлениями о сбоях. На скриншотах имена заменены." },
+  { title: "Бот-маскот для чата клана", tag: "telegram-бот · сервер 24/7", 
+    desc: "Живой кот-маскот игрового сообщества. Сам созывает на съёмки по расписанию, отвечает на «когда съёмки?», ведёт явку: берёт отметки из голосового канала Discord, админы проверяют их кнопками, и бот записывает их в Excel-таблицу, а потом сообщает о трёх пропусках подряд и поздравляет за серии. Для участников — фарм и рюкзак с приватными сообщениями, кормёжка и дружба, викторины, вопрос дня, цитатник, сезонные фразы и праздники, анонимные обращения к админам. Работает на своём сервере как служба, с автоперезапуском, ночными бэкапами и уведомлениями о сбоях." },
   { title: "Бот-анкета для сообщества", tag: "telegram-бот · демо", img: "img/anketa-4.jpg", demo: "demo-anketa.html",
-    imgs: ["img/anketa-1.jpg", "img/anketa-2.jpg", "img/anketa-3.jpg", "img/anketa-4.jpg", "img/anketa-5.jpg", "img/anketa-6.jpg"],
+    imgs: ["img/anketa-1.jpg", "img/anketa-2.jpg", "img/anketa-3.jpg", "img/anketa-4.jpg", "img/anketa-5.jpg"],
     desc: "Анкеты, правила, расписание. Бот сам проверяет анкету по критериям: неподходящую возвращает автору с причиной и сообщает админам, подходящую отправляет админам. Под анкетой админы голосуют «Принять / Отклонить», а потом одной кнопкой отправляют кандидату личную ссылку-заявку в чат на 48 часов. Когда человек по ней стучится, бот спрашивает админов, впускать ли, и предупреждает, если ссылку переслали другому. Ответ админа доходит до человека через бота. Работает в настоящем игровом сообществе несколько месяцев. В демо имена и названия заменены." },
   { title: "Надёжный хостинг ботов", tag: "linux-сервер · защита от сбоев", img: "img/server-1.jpg",
     desc: "Три бота сообщества (два Telegram и один Discord) переехали с домашнего ПК на VPS. Каждый работает как служба systemd и сам перезапускается при падении. Отдельный сторож каждые 5 минут проверяет, что боты живы и запущены ровно в одной копии, следит за диском и пишет владельцу в Telegram. Каждую ночь делается бэкап данных, он хранится 14 дней. Токены не попадают в логи." },
@@ -381,7 +406,7 @@ const LINKS = [
 /* ===================================================== */
 
 const tg = window.Telegram ? window.Telegram.WebApp : null;
-if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor("#04060d"); tg.setBackgroundColor("#04060d"); tg.BackButton.hide(); } catch (e) {} }
+if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor("#020203"); tg.setBackgroundColor("#020203"); tg.BackButton.hide(); } catch (e) {} }
 const haptic = (t) => { try { tg && tg.HapticFeedback.selectionChanged(); } catch (e) {} };
 
 const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
