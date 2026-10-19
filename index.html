@@ -450,9 +450,9 @@ const haptic = (t) => { try { tg && tg.HapticFeedback.selectionChanged(); } catc
   let i = 0;
   setTimeout(function step() {
     el.textContent = text.slice(0, ++i);
-    if (i < text.length) setTimeout(step, 90 + Math.random() * 90);   // неровный темп — как живой человек
+    if (i < text.length) setTimeout(step, 140 + Math.random() * 120);   // неровный темп — как живой человек
     else { box.classList.remove("busy"); setTimeout(showRest, 250); }
-  }, 500);
+  }, 1100);
 })();
 
 const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
