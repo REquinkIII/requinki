@@ -520,9 +520,9 @@ const haptic = (t) => { try { tg && tg.HapticFeedback.selectionChanged(); } catc
     <g id="body" mask="url(#mk)"></g><g id="eyeG" filter="url(#glow)" opacity="0"><g id="eyeIn"></g></g></svg>`;
   const svg = splash.firstElementChild, $ = (id) => svg.querySelector("#" + id);
   [...src.querySelectorAll("path")].forEach(p => {
-    // глаз — отдельный кусок логотипа рядом с точкой (52%, 22%)
+    // глаз — отдельный path с id="eye" (в старом логотипе — кусок рядом с точкой 52%, 22%)
     const m = /translate\(([\d.]+),\s*([\d.]+)\)/.exec(p.getAttribute("transform") || "");
-    const isEye = m && Math.abs(m[1] - VW * .5) < 40 && Math.abs(m[2] - VH * .216) < 30 && p.getAttribute("d").length < 5000;
+    const isEye = p.id === "eye" || m && Math.abs(m[1] - VW * .5) < 40 && Math.abs(m[2] - VH * .216) < 30 && p.getAttribute("d").length < 5000;
     $(isEye ? "eyeIn" : "body").appendChild(document.importNode(p, true));
   });
   let eb;
@@ -554,7 +554,7 @@ const haptic = (t) => { try { tg && tg.HapticFeedback.selectionChanged(); } catc
     $("eyeIn").setAttribute("transform", `translate(${ecx} ${ecy}) scale(1 ${sy}) translate(${-ecx} ${-ecy})`);
     const g = glowFade === null ? 22 : 22 * (1 - clamp((now - glowFade) / 1600));
     $("gb").setAttribute("stdDeviation", (g / f).toFixed(3));
-    $("gb2").setAttribute("stdDeviation", (1.6 / f).toFixed(3));   // смягчает «ступеньки» трассировки при сильном увеличении
+    $("gb2").setAttribute("stdDeviation", (0.5 / f).toFixed(3));   // чуть смягчает край глаза при сильном увеличении
     // обводка енота — сектором по кругу от глаза
     const a = 2 * Math.PI * ease(clamp((t - SWEEP[0]) / (SWEEP[1] - SWEEP[0]))), R = 4000, a0 = -Math.PI * .9;
     if (a >= 2 * Math.PI - 1e-3) $("wedge").setAttribute("d", `M-5000 -5000H5000V5000H-5000Z`);
