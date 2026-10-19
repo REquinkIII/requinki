@@ -46,17 +46,19 @@
     content: ""; position: absolute; inset: 0; opacity: .09; mix-blend-mode: screen;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .65 0 0 0 0 1 0 0 0 1.4 -.4'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
   }
-  .film {
+  .film {   /* плёнка: перфорация сверху/снизу + кадры, едет по кругу */
     position: absolute; width: 160%; height: 46px; left: -30%;
     background:
-      repeating-linear-gradient(90deg, transparent 0 6px, rgba(2,2,3,.95) 6px 14px) top / 100% 7px no-repeat,
-      repeating-linear-gradient(90deg, transparent 0 6px, rgba(2,2,3,.95) 6px 14px) bottom / 100% 7px no-repeat,
-      repeating-linear-gradient(90deg, rgba(18,30,72,.6) 0 58px, rgba(2,2,3,.9) 58px 62px);
+      repeating-linear-gradient(90deg, transparent 0 6px, rgba(2,2,3,.95) 6px 14px) 0 0 / 14px 7px repeat-x,
+      repeating-linear-gradient(90deg, transparent 0 6px, rgba(2,2,3,.95) 6px 14px) 0 100% / 14px 7px repeat-x,
+      repeating-linear-gradient(90deg, rgba(18,30,72,.6) 0 58px, rgba(2,2,3,.9) 58px 62px) 0 0 / 62px 100% repeat-x;
     border-top: 1px solid rgba(110,150,255,.35); border-bottom: 1px solid rgba(110,150,255,.35);
-    opacity: .45;
+    opacity: .45; animation: reel 14s linear infinite;
   }
+  @keyframes reel { to { background-position: -434px 0, -434px 100%, -434px 0; } }   /* 434 = 14 × 31 = 62 × 7 */
   .film.f1 { top: 120px; transform: rotate(-32deg); }
-  .film.f2 { top: 70%; transform: rotate(-32deg); opacity: .3; }
+  .film.f2 { top: 70%; transform: rotate(-32deg); opacity: .3; animation-duration: 22s; animation-direction: reverse; }
+  @media (prefers-reduced-motion: reduce) { .film { animation: none; } }
 
   .wrap { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; padding: 18px 16px 110px; }
 
@@ -395,7 +397,7 @@ const WORKS = [
   { title: "Бот-маскот для чата клана", tag: "telegram-бот · сервер 24/7", img: "img/mascot-farm.jpg",
     imgs: ["img/mascot-farm.jpg", "img/mascot-live-1.jpg", "img/mascot-live-2.jpg", "img/mascot-attend.jpg"],
     desc: "Живой кот-маскот игрового сообщества. Сам созывает на съёмки по расписанию, отвечает на «когда съёмки?», ведёт явку: берёт отметки из голосового канала Discord, админы проверяют их кнопками, и бот записывает их в Excel-таблицу, а потом сообщает о трёх пропусках подряд и поздравляет за серии. Для участников — фарм и рюкзак с приватными сообщениями, кормёжка и дружба, викторины, вопрос дня, цитатник, сезонные фразы и праздники, анонимные обращения к админам. Работает на своём сервере как служба, с автоперезапуском, ночными бэкапами и уведомлениями о сбоях. Ники участников размыты." },
-  { title: "Бот-анкета для сообщества", tag: "telegram-бот + mini app", img: "img/anketa-app-1.jpg", demo: "demo-anketa.html",
+  { title: "Бот-анкета для сообщества", tag: "telegram-бот + mini app", img: "img/anketa-app-1.jpg",
     imgs: ["img/anketa-app-1.jpg", "img/anketa-app-2.jpg", "img/anketa-admin.jpg"],
     desc: "Вступление в клан через мини-приложение: человек читает правила по разделам (дальше не пустит, пока не дочитал), проходит проверочные вопросы и заполняет анкету с фото скина. Два маскота-помощника подсказывают по ходу. Готовая анкета приходит админам в отдельную тему: видно, сколько ошибок было в проверках. Под анкетой админы голосуют «Принять / Отклонить», а потом одной кнопкой отправляют кандидату личную ссылку-заявку в чат на 48 часов. Когда человек по ней стучится, бот спрашивает админов, впускать ли, и предупреждает, если ссылку переслали другому. Ответ админа доходит до человека через бота. Ники и данные кандидата размыты." },
   { title: "Надёжный хостинг ботов", tag: "linux-сервер · защита от сбоев", img: "img/server-1.jpg",
