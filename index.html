@@ -117,22 +117,20 @@
   @keyframes caret { 50% { opacity: 0; } }
 
   /* ===== заставка при входе =====
-     s1 — светится только глаз, s2 — енот обрисовывается по кругу, s3 — печатается ник,
-     s4 — подпись и «маска»; потом класс intro снимается и шапка уезжает на место. */
-  @property --sweep { syntax: "<angle>"; inherits: false; initial-value: 360deg; }
-  .logo { position: relative; display: inline-block; line-height: 0; }
-  .logo .eye { position: absolute; left: 0; top: 0; opacity: 0; clip-path: ellipse(11% 4% at 52% 21.8%);
-               filter: drop-shadow(0 0 6px #7fa8ff) drop-shadow(0 0 14px #3d7bff); }
-  .logo .full { -webkit-mask: conic-gradient(from 200deg at 52% 22%, #000 var(--sweep), transparent 0);
-                        mask: conic-gradient(from 200deg at 52% 22%, #000 var(--sweep), transparent 0); }
-  body.intro .logo .full { --sweep: 0deg; }
-  body.intro.s1 .logo .eye { opacity: 1; transition: opacity .5s; animation: blink .25s 0.75s; }
-  .logo .eye { transform-origin: 52% 21.8%; }
-  @keyframes blink { 50% { transform: scaleY(.1); } }
-  body.intro.s2 .logo .full { --sweep: 360deg; transition: --sweep 1.2s cubic-bezier(.6,.05,.35,1); }
-  body.intro:not(.s3) .type .typed::after { visibility: hidden; }
-  body.intro:not(.s4) .tagline, body.intro:not(.s4) .mask { opacity: 0; transform: translateY(6px); }
+     Рисуется отдельным векторным слоем .splash (чтобы глаз на весь экран был чётким):
+     глаз светится → вокруг обрисовывается енот → он уменьшается ровно на место логотипа в шапке →
+     s4: печатается ник, свечение глаза гаснет → s5: подпись и «маска» → класс intro снимается. */
+  .logo { display: inline-block; line-height: 0; }
+  .splash { position: fixed; inset: 0; z-index: 30; pointer-events: none; }
+  .splash svg { position: absolute; inset: 0; width: 100%; height: 100%;
+                filter: drop-shadow(0 0 7px rgba(61,123,255,.8)); }
+  body:not(.intro) .splash { display: none; }
+  body.intro .logo img { opacity: 0; }
+  body.intro:not(.s4) .type .typed::after { visibility: hidden; }
+  body.intro:not(.s5) .tagline, body.intro:not(.s5) .mask { opacity: 0; transform: translateY(6px); }
   .tagline, .mask { transition: opacity .6s ease, transform .6s ease; }
+  body.intro .bg::before { opacity: .35; }
+  .bg::before { transition: opacity 1s; }
 
   .hero { transition: transform .8s cubic-bezier(.6,.05,.25,1); }
   body.intro .hero { transform: translateY(var(--dy, 30vh)) scale(1.2); }
@@ -271,13 +269,14 @@
 </style>
 </head>
 <body class="intro">
+<div class="splash" id="splash"></div>
 <div class="bg"><div class="film f1"></div><div class="film f2"></div></div>
 
 <div class="wrap">
   <div class="hud hud-top"><span>//requinki.exe</span><span>mood: <b>grumpy</b> · status: <b>online</b></span></div>
 
   <div class="hero" id="hero">
-    <h1 class="glitch"><span class="logo"><img class="full" src="img/logo-raccoon.svg" alt=""><img class="eye" src="img/logo-raccoon.svg" alt=""></span><span class="type" aria-label="REquinki"><span class="ghost">REquinki</span><span class="typed" id="typed"></span></span></h1>
+    <h1 class="glitch"><span class="logo"><img src="img/logo-raccoon.svg" alt="" id="logoImg"></span><span class="type" aria-label="REquinki"><span class="ghost">REquinki</span><span class="typed" id="typed"></span></span></h1>
     <p class="tagline">моушн · 3D · Roblox-графика · Telegram-боты и сайты</p>
     <div class="mask">keep your masks on</div>
   </div>
@@ -464,45 +463,111 @@ const tg = window.Telegram ? window.Telegram.WebApp : null;
 if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor("#020203"); tg.setBackgroundColor("#020203"); tg.BackButton.hide(); } catch (e) {} }
 const haptic = (t) => { try { tg && tg.HapticFeedback.selectionChanged(); } catch (e) {} };
 
-// --- заставка: глаз → енот → ник → подпись → приложение. Тап — пропустить ---
-(function intro() {
+// --- заставка: глаз на весь экран → енот обрисовывается → уменьшается → ник → приложение. Тап — пропустить ---
+(async function intro() {
   const body = document.body, hero = document.getElementById("hero");
+  const img = document.getElementById("logoImg"), splash = document.getElementById("splash");
   const text = "REquinki", typed = document.getElementById("typed");
+  const NS = "http://www.w3.org/2000/svg";
   const timers = [];
   const later = (ms, f) => timers.push(setTimeout(f, ms));
-  let done = false;
+  let done = false, raf = 0;
 
   function finish() {
     if (done) return; done = true;
-    timers.forEach(clearTimeout);
+    timers.forEach(clearTimeout); cancelAnimationFrame(raf);
     typed.textContent = text;
     typed.parentElement.classList.remove("busy");
-    body.classList.add("s1", "s2", "s3", "s4");
+    body.classList.add("s4", "s5");
     requestAnimationFrame(() => body.classList.remove("intro"));
     removeEventListener("pointerdown", finish);
   }
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { finish(); return; }
-
-  // шапку ставим по центру экрана, потом она поедет на своё место
-  hero.style.transform = "none";                  // меряем без сдвига заставки
-  const r = hero.getBoundingClientRect();
-  hero.style.transform = "";
-  hero.style.setProperty("--dy", (innerHeight / 2 - (r.top + r.height / 2)) + "px");
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return finish();
   addEventListener("pointerdown", finish);
 
-  later(250, () => body.classList.add("s1"));                 // глаз
-  later(1150, () => body.classList.add("s2"));                // обводка
-  later(2350, () => {                                         // ник
-    body.classList.add("s3");
+  // шапку — в центр экрана (без анимации), и запоминаем, где окажется логотип
+  hero.style.transition = "none";
+  hero.style.transform = "none";
+  const h = hero.getBoundingClientRect();
+  hero.style.transform = "";
+  hero.style.setProperty("--dy", (innerHeight / 2 - (h.top + h.height / 2)) + "px");
+  const L = img.getBoundingClientRect();
+  requestAnimationFrame(() => hero.style.transition = "");
+
+  // берём векторный логотип и собираем из него большой слой
+  let src;
+  try { src = new DOMParser().parseFromString(await (await fetch(img.src)).text(), "image/svg+xml").documentElement; }
+  catch (e) { return finish(); }
+  if (done) return;
+  const [, , VW, VH] = src.getAttribute("viewBox").split(/\s+/).map(Number);
+  const W = innerWidth, H = innerHeight;
+  splash.innerHTML = `<svg xmlns="${NS}" preserveAspectRatio="none">
+    <defs>
+      <filter id="glow" x="-1" y="-1" width="3" height="3"><feGaussianBlur id="gb" stdDeviation="0"/>
+        <feMerge result="halo"><feMergeNode/><feMergeNode/></feMerge>
+        <feGaussianBlur id="gb2" in="SourceGraphic" stdDeviation="0" result="core"/>
+        <feMerge><feMergeNode in="halo"/><feMergeNode in="core"/></feMerge></filter>
+      <mask id="mk" maskUnits="userSpaceOnUse" x="-5000" y="-5000" width="10000" height="10000">
+        <path id="wedge" fill="#fff"/></mask>
+    </defs>
+    <g id="body" mask="url(#mk)"></g><g id="eyeG" filter="url(#glow)" opacity="0"><g id="eyeIn"></g></g></svg>`;
+  const svg = splash.firstElementChild, $ = (id) => svg.querySelector("#" + id);
+  [...src.querySelectorAll("path")].forEach(p => {
+    // глаз — отдельный кусок логотипа рядом с точкой (52%, 22%)
+    const m = /translate\(([\d.]+),\s*([\d.]+)\)/.exec(p.getAttribute("transform") || "");
+    const isEye = m && Math.abs(m[1] - VW * .5) < 40 && Math.abs(m[2] - VH * .216) < 30 && p.getAttribute("d").length < 5000;
+    $(isEye ? "eyeIn" : "body").appendChild(document.importNode(p, true));
+  });
+  const eb = $("eyeG").getBBox();
+  const ecx = eb.x + eb.width / 2, ecy = eb.y + eb.height / 2;
+
+  // кадры: f — сколько экранных пикселей в одной единице логотипа
+  const f0 = W * .8 / eb.width, f1 = L.width / VW;
+  const box = (f, ax, ay, sx, sy) => [ax - sx / f, ay - sy / f, W / f, H / f];   // точка (ax,ay) логотипа — в (sx,sy) экрана
+  const ease = (x) => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  const clamp = (x) => Math.max(0, Math.min(1, x));
+  const T0 = performance.now(), ZOOM = [1700, 3000], SWEEP = [1300, 2400];
+  let glowFade = null;   // когда начнёт гаснуть свечение (время s4)
+
+  function frame(now) {
+    const t = now - T0;
+    // масштаб: плавно в логарифме, чтобы уменьшение шло равномерно
+    const z = ease(clamp((t - ZOOM[0]) / (ZOOM[1] - ZOOM[0])));
+    const f = Math.exp(Math.log(f0) + (Math.log(f1) - Math.log(f0)) * z);
+    // глаз всё время на экране: его экранная точка едет из центра туда, где он будет в шапке
+    const sx = W / 2 + (L.left + ecx * f1 - W / 2) * z, sy0 = H / 2 + (L.top + ecy * f1 - H / 2) * z;
+    svg.setAttribute("viewBox", box(f, ecx, ecy, sx, sy0).join(" "));
+    // глаз: появляется, моргает, светится; гаснет, пока печатается ник
+    $("eyeG").setAttribute("opacity", clamp(t / 500));
+    // моргает дважды, как спросонья: в 0,7 и 1,1 с
+    const blink = (at) => Math.sin(Math.PI * clamp((t - at) / 240));
+    const sy = 1 - .92 * Math.max(blink(700), blink(1100));
+    $("eyeIn").setAttribute("transform", `translate(${ecx} ${ecy}) scale(1 ${sy}) translate(${-ecx} ${-ecy})`);
+    const g = glowFade === null ? 22 : 22 * (1 - clamp((now - glowFade) / 1600));
+    $("gb").setAttribute("stdDeviation", (g / f).toFixed(3));
+    $("gb2").setAttribute("stdDeviation", (1.6 / f).toFixed(3));   // смягчает «ступеньки» трассировки при сильном увеличении
+    // обводка енота — сектором по кругу от глаза
+    const a = 2 * Math.PI * ease(clamp((t - SWEEP[0]) / (SWEEP[1] - SWEEP[0]))), R = 4000, a0 = -Math.PI * .9;
+    if (a >= 2 * Math.PI - 1e-3) $("wedge").setAttribute("d", `M-5000 -5000H5000V5000H-5000Z`);
+    else if (a > 0) $("wedge").setAttribute("d",
+      `M${ecx} ${ecy}L${ecx + R * Math.cos(a0)} ${ecy + R * Math.sin(a0)}` +
+      `A${R} ${R} 0 ${a > Math.PI ? 1 : 0} 1 ${ecx + R * Math.cos(a0 + a)} ${ecy + R * Math.sin(a0 + a)}Z`);
+    if (!done) raf = requestAnimationFrame(frame);
+  }
+  raf = requestAnimationFrame(frame);
+
+  later(3150, () => {                                         // ник
+    body.classList.add("s4");
+    glowFade = performance.now();
     typed.parentElement.classList.add("busy");
     let i = 0;
-    later(350, function step() {
+    later(300, function step() {
       typed.textContent = text.slice(0, ++i);
       if (i < text.length) later(110 + Math.random() * 100, step);   // неровный темп, как живой человек
       else {
         typed.parentElement.classList.remove("busy");
-        later(250, () => body.classList.add("s4"));           // подпись и «маска»
-        later(1100, finish);                                  // приложение
+        later(300, () => body.classList.add("s5"));           // подпись и «маска»
+        later(1200, finish);                                  // приложение
       }
     });
   });
