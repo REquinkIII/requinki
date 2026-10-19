@@ -122,9 +122,10 @@
      s4: печатается ник, свечение глаза гаснет → s5: подпись и «маска» → класс intro снимается. */
   .logo { display: inline-block; line-height: 0; }
   .splash { position: fixed; inset: 0; z-index: 30; pointer-events: none; }
-  .splash svg { position: absolute; inset: 0; width: 100%; height: 100%;
-                filter: drop-shadow(0 0 7px rgba(61,123,255,.8)); }
-  body:not(.intro) .splash { display: none; }
+  .splash svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .splash { transition: opacity .35s; }
+  body:not(.intro) .splash { opacity: 0; }
+  .logo img { transition: opacity .35s; }
   body.intro .logo img { opacity: 0; }
   body.intro:not(.s4) .type .typed::after { visibility: hidden; }
   body.intro:not(.s5) .tagline, body.intro:not(.s5) .mask { opacity: 0; transform: translateY(6px); }
@@ -480,6 +481,7 @@ const haptic = (t) => { try { tg && tg.HapticFeedback.selectionChanged(); } catc
     typed.parentElement.classList.remove("busy");
     body.classList.add("s4", "s5");
     requestAnimationFrame(() => body.classList.remove("intro"));
+    setTimeout(() => splash.remove(), 500);
     removeEventListener("pointerdown", finish);
   }
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return finish();
@@ -510,7 +512,7 @@ const haptic = (t) => { try { tg && tg.HapticFeedback.selectionChanged(); } catc
   const W = innerWidth, H = innerHeight;
   splash.innerHTML = `<svg xmlns="${NS}" preserveAspectRatio="none">
     <defs>
-      <filter id="glow" x="-1" y="-1" width="3" height="3"><feGaussianBlur id="gb" stdDeviation="0"/>
+      <filter id="glow" x="-.5" y="-1.2" width="2" height="3.4"><feGaussianBlur id="gb" stdDeviation="0"/>
         <feMerge result="halo"><feMergeNode/><feMergeNode/></feMerge>
         <feGaussianBlur id="gb2" in="SourceGraphic" stdDeviation="0" result="core"/>
         <feMerge><feMergeNode in="halo"/><feMergeNode in="core"/></feMerge></filter>
@@ -535,7 +537,7 @@ const haptic = (t) => { try { tg && tg.HapticFeedback.selectionChanged(); } catc
   const box = (f, ax, ay, sx, sy) => [ax - sx / f, ay - sy / f, W / f, H / f];   // точка (ax,ay) логотипа — в (sx,sy) экрана
   const ease = (x) => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
   const clamp = (x) => Math.max(0, Math.min(1, x));
-  const T0 = performance.now(), ZOOM = [1700, 3000], SWEEP = [1300, 2400];
+  const T0 = performance.now(), ZOOM = [2150, 3350], SWEEP = [1250, 2150];
   let glowFade = null;   // когда начнёт гаснуть свечение (время s4)
 
   function frame(now) {
@@ -557,7 +559,7 @@ const haptic = (t) => { try { tg && tg.HapticFeedback.selectionChanged(); } catc
     $("gb2").setAttribute("stdDeviation", (0.5 / f).toFixed(3));   // чуть смягчает край глаза при сильном увеличении
     // обводка енота — сектором по кругу от глаза
     const a = 2 * Math.PI * ease(clamp((t - SWEEP[0]) / (SWEEP[1] - SWEEP[0]))), R = 4000, a0 = -Math.PI * .9;
-    if (a >= 2 * Math.PI - 1e-3) $("wedge").setAttribute("d", `M-5000 -5000H5000V5000H-5000Z`);
+    if (a >= 2 * Math.PI - 1e-3) $("body").removeAttribute("mask");   // обводка готова — маска больше не нужна
     else if (a > 0) $("wedge").setAttribute("d",
       `M${ecx} ${ecy}L${ecx + R * Math.cos(a0)} ${ecy + R * Math.sin(a0)}` +
       `A${R} ${R} 0 ${a > Math.PI ? 1 : 0} 1 ${ecx + R * Math.cos(a0 + a)} ${ecy + R * Math.sin(a0 + a)}Z`);
@@ -565,7 +567,7 @@ const haptic = (t) => { try { tg && tg.HapticFeedback.selectionChanged(); } catc
   }
   raf = requestAnimationFrame(frame);
 
-  later(3150, () => {                                         // ник
+  later(3450, () => {                                         // ник
     body.classList.add("s4");
     glowFade = performance.now();
     typed.parentElement.classList.add("busy");
