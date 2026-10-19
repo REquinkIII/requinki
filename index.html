@@ -104,6 +104,19 @@
   }
   h1 img { height: 92px; letter-spacing: 0; filter: drop-shadow(0 0 6px rgba(61,123,255,.8)); }
   .tagline { color: var(--muted); margin: 4px 0 0; }
+
+  /* ник печатается, как в строке ввода, потом мигает курсор */
+  .type { position: relative; display: inline-block; text-align: left; }
+  .type .ghost { visibility: hidden; }            /* держит ширину, чтобы логотип не ездил */
+  .type .typed { position: absolute; left: 0; top: 0; white-space: nowrap; }
+  .type .typed::after {
+    content: ""; display: inline-block; width: 3px; height: .9em; margin-left: 4px; vertical-align: -.08em;
+    background: var(--neon2); box-shadow: 0 0 8px var(--neon), 0 0 16px var(--neon); animation: caret 1s steps(1) infinite;
+  }
+  .type.busy .typed::after { animation: none; }   /* пока печатает — курсор горит ровно */
+  @keyframes caret { 50% { opacity: 0; } }
+  .intro { opacity: 0; transform: translateY(6px); transition: opacity .6s ease, transform .6s ease; }
+  .intro.shown { opacity: 1; transform: none; }
   .glitch { animation: glitch 6s infinite steps(1); }
   @keyframes glitch {
     0%, 96%, 100% { transform: none; text-shadow: 0 0 18px rgba(61,123,255,.55); }
@@ -241,9 +254,9 @@
   <div class="hud hud-top"><span>//requinki.exe</span><span>mood: <b>grumpy</b> · status: <b>online</b></span></div>
 
   <div class="hero">
-    <h1 class="glitch"><img src="img/logo-raccoon.svg" alt="">REquinki</h1>
-    <p class="tagline">моушн · 3D · Roblox-графика · Telegram-боты и сайты</p>
-    <div class="mask">keep your masks on</div>
+    <h1 class="glitch"><img src="img/logo-raccoon.svg" alt=""><span class="type" aria-label="REquinki"><span class="ghost">REquinki</span><span class="typed" id="typed"></span></span></h1>
+    <p class="tagline intro">моушн · 3D · Roblox-графика · Telegram-боты и сайты</p>
+    <div class="mask intro">keep your masks on</div>
   </div>
 
   <!-- ===== УСЛУГИ ===== -->
@@ -427,6 +440,20 @@ const LINKS = [
 const tg = window.Telegram ? window.Telegram.WebApp : null;
 if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor("#020203"); tg.setBackgroundColor("#020203"); tg.BackButton.hide(); } catch (e) {} }
 const haptic = (t) => { try { tg && tg.HapticFeedback.selectionChanged(); } catch (e) {} };
+
+// --- печать ника в шапке ---
+(function typeNick() {
+  const text = "REquinki", el = document.getElementById("typed"), box = el.parentElement;
+  const showRest = () => document.querySelectorAll(".intro").forEach((e, i) => setTimeout(() => e.classList.add("shown"), i * 250));
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = text; showRest(); return; }
+  box.classList.add("busy");
+  let i = 0;
+  setTimeout(function step() {
+    el.textContent = text.slice(0, ++i);
+    if (i < text.length) setTimeout(step, 90 + Math.random() * 90);   // неровный темп — как живой человек
+    else { box.classList.remove("busy"); setTimeout(showRest, 250); }
+  }, 500);
+})();
 
 const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
