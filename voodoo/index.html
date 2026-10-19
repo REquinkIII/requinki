@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Кукла Вуду</title>
+<!-- Библиотека Телеграма: даёт объект Telegram.WebApp (вибрация, цвета, кнопки) -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root { --bg: #14100f; --card: #221a17; --text: #f2e6dc; --muted: #9c8a7e; --accent: #c8323c; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
+    font: 15px system-ui, -apple-system, "Segoe UI", sans-serif; overflow: hidden;
+    user-select: none; -webkit-user-select: none; touch-action: none; }
+  .app { height: 100%; display: flex; flex-direction: column; }
+
+  header { padding: 14px 16px 4px; display: flex; justify-content: space-between; align-items: center; }
+  h1 { margin: 0; font-size: 20px; letter-spacing: .5px; }
+  .count { color: var(--muted); font-size: 13px; }
+
+  /* Сцена с куклой */
+  .stage { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+  .doll-wrap { position: relative; height: 92%; aspect-ratio: 300 / 420; }
+  .doll-wrap svg { width: 100%; height: 100%; display: block; overflow: visible; }
+  .pins { position: absolute; inset: 0; pointer-events: none; }
+  .shake { animation: shake .35s; }
+  @keyframes shake { 20% { transform: translateX(-6px) rotate(-2deg); } 50% { transform: translateX(5px) rotate(2deg); }
+                     80% { transform: translateX(-3px); } }
+  .ouch { position: absolute; font-weight: 700; color: #ffd3d3; pointer-events: none;
+          animation: fly .9s ease-out forwards; text-shadow: 0 2px 6px #000; }
+  @keyframes fly { to { transform: translateY(-50px); opacity: 0; } }
+
+  /* Иголка: остриё внизу, поэтому поворачиваем вокруг нижней точки */
+  .needle { position: absolute; width: 16px; height: 86px; transform-origin: 50% 100%; }
+  .needle .head { position: absolute; top: 0; left: 0; width: 16px; height: 16px; border-radius: 50%;
+                  box-shadow: inset -3px -3px 4px rgba(0,0,0,.35), inset 2px 2px 3px rgba(255,255,255,.5); }
+  .needle .shaft { position: absolute; top: 12px; left: 7px; width: 2px; height: 74px;
+                   background: linear-gradient(90deg, #8d8d8d, #f4f4f4, #8d8d8d); clip-path: polygon(0 0, 100% 0, 50% 100%); }
+  .dragging { position: fixed; z-index: 10; pointer-events: none; transform: rotate(-12deg); filter: drop-shadow(0 6px 6px rgba(0,0,0,.5)); }
+
+  /* Подставка с иголками */
+  .tray { display: flex; justify-content: center; gap: 22px; padding: 10px 16px 6px; background: var(--card);
+          border-top: 1px solid #3a2c26; }
+  .tray .slot { position: relative; width: 16px; height: 86px; cursor: grab; }
+  .tray .slot .needle { left: 0; top: 0; }
+
+  .bar { display: flex; gap: 8px; padding: 8px 16px 16px; background: var(--card); }
+  .bar button { flex: 1; padding: 11px; border: 0; border-radius: 10px; background: #3a2c26; color: var(--text);
+                font: inherit; font-weight: 600; }
+  .bar button.main { background: var(--accent); }
+  .hint { text-align: center; color: var(--muted); font-size: 12px; padding: 6px 16px 0; background: var(--card); }
+</style>
+</head>
+<body>
+<div class="app">
+  <header><h1>🪡 Кукла Вуду</h1><span class="count" id="count">уколов: 0</span></header>
+
+  <div class="stage">
+    <div class="doll-wrap" id="doll">
+      <!-- ЗАГЛУШКА: потом здесь будет спрайт от дизайнера (<img src="doll.png">) -->
+      <svg viewBox="0 0 300 420">
+        <defs>
+          <pattern id="burlap" width="6" height="6" patternUnits="userSpaceOnUse">
+            <rect width="6" height="6" fill="#b48a5e"/><path d="M0 3h6M3 0v6" stroke="#9c7449" stroke-width="1"/>
+          </pattern>
+          <clipPath id="face"><circle cx="150" cy="95" r="62"/></clipPath>
+        </defs>
+        <g class="body" fill="url(#burlap)" stroke="#5a3d24" stroke-width="3">
+          <path d="M60 150 Q20 160 22 205 Q40 215 70 200 Z"/>               <!-- левая рука -->
+          <path d="M240 150 Q280 160 278 205 Q260 215 230 200 Z"/>          <!-- правая рука -->
+          <path d="M100 300 Q85 380 95 405 Q120 412 135 400 L145 310 Z"/>   <!-- левая нога -->
+          <path d="M200 300 Q215 380 205 405 Q180 412 165 400 L155 310 Z"/> <!-- правая нога -->
+          <path d="M80 145 Q150 125 220 145 Q245 230 210 315 Q150 335 90 315 Q55 230 80 145 Z"/> <!-- туловище -->
+          <circle cx="150" cy="95" r="65"/>                                  <!-- голова -->
+        </g>
+        <image id="photo" href="" x="88" y="33" width="124" height="124" clip-path="url(#face)"
+               preserveAspectRatio="xMidYMid slice" style="display:none"/>
+        <g id="face-drawn" stroke="#2b1a10" stroke-width="5" stroke-linecap="round">
+          <path d="M115 80l18 18M133 80l-18 18"/>                            <!-- глаз-крестик -->
+          <circle cx="182" cy="89" r="10" fill="#2b1a10"/><circle cx="178" cy="85" r="2" fill="#fff" stroke="none"/>
+          <path d="M118 125h64M126 119v12M138 119v12M150 119v12M162 119v12M174 119v12" stroke-width="3"/>
+        </g>
+        <path d="M150 128 Q150 210 150 300" stroke="#5a3d24" stroke-width="2" stroke-dasharray="7 6" fill="none"/>
+        <path transform="translate(180 168) scale(1.6)" d="M0 6C-2-2-12-2-12 6C-12 13-4 18 0 23C4 18 12 13 12 6C12-2 2-2 0 6Z"
+              fill="#8e1f27" stroke="#5a1015" stroke-width="1.3"/>                <!-- сердце -->
+      </svg>
+      <div class="pins" id="pins"></div>
+    </div>
+  </div>
+
+  <div class="hint">Возьми иголку снизу и воткни в куклу</div>
+  <div class="tray" id="tray"></div>
+  <div class="bar">
+    <button class="main" id="photoBtn">📷 Фото на лицо</button>
+    <button id="clearBtn">🧹 Вытащить всё</button>
+  </div>
+  <input type="file" id="file" accept="image/*" hidden>
+</div>
+
+<script>
+// --- Телеграм ---
+const tg = window.Telegram?.WebApp;
+if (tg) {
+  tg.ready();                         // говорим Телеграму «страница загрузилась»
+  tg.expand();                        // на весь экран
+  tg.disableVerticalSwipes?.();       // иначе свайп вниз с иголкой закроет приложение
+  tg.setHeaderColor?.("#14100f");
+}
+function buzz(kind) {                 // вибрация телефона (только внутри Телеграма)
+  tg?.HapticFeedback?.impactOccurred(kind);
+}
+
+// --- Иголки на выбор: цвет шарика ---
+const NEEDLES = ["#c8323c", "#2f6fd6", "#2fa84f", "#e0b020", "#1a1a1a", "#b64fd0"];
+const OUCH = ["Ай!", "Ой!", "Ауч!", "За что?!", "Больно!", "Ну хватит…", "Ыыы", "😭"];
+
+function makeNeedle(color) {
+  const n = document.createElement("div");
+  n.className = "needle";
+  n.innerHTML = `<div class="shaft"></div><div class="head" style="background:${color}"></div>`;
+  return n;
+}
+
+const tray = document.getElementById("tray");
+const doll = document.getElementById("doll");
+const pins = document.getElementById("pins");
+let count = 0;
+
+NEEDLES.forEach(color => {
+  const slot = document.createElement("div");
+  slot.className = "slot";
+  slot.appendChild(makeNeedle(color));
+  slot.addEventListener("pointerdown", e => startDrag(e, color));
+  tray.appendChild(slot);
+});
+
+// --- Перетаскивание ---
+let dragged = null;
+
+function startDrag(e, color) {
+  e.preventDefault();
+  dragged = makeNeedle(color);
+  dragged.classList.add("dragging");
+  dragged.dataset.color = color;
+  document.body.appendChild(dragged);
+  moveDrag(e);
+  buzz("light");
+}
+
+function moveDrag(e) {
+  if (!dragged) return;
+  // остриё (низ иголки) ставим чуть выше пальца, чтобы его было видно
+  dragged.style.left = (e.clientX - 8) + "px";
+  dragged.style.top = (e.clientY - 86 - 30) + "px";
+}
+
+function endDrag(e) {
+  if (!dragged) return;
+  const color = dragged.dataset.color;
+  dragged.remove();
+  dragged = null;
+  const x = e.clientX, y = e.clientY - 30;          // где оказалось остриё
+  if (hitsDoll(x, y)) stick(x, y, color);
+}
+
+// попали ли в куклу: смотрим, что лежит под точкой
+function hitsDoll(x, y) {
+  return document.elementsFromPoint(x, y).some(el => el.closest?.(".body") || el.id === "photo");
+}
+
+function stick(x, y, color) {
+  const box = doll.getBoundingClientRect();
+  const n = makeNeedle(color);
+  // в процентах — чтобы иголки не съезжали, если экран поменяет размер
+  n.style.left = ((x - box.left) / box.width * 100) + "%";
+  n.style.top = ((y - box.top) / box.height * 100) + "%";
+  n.style.marginLeft = "-8px";
+  n.style.marginTop = "-86px";
+  n.style.transform = `rotate(${Math.random() * 50 - 25}deg)`;
+  pins.appendChild(n);
+
+  count++;
+  document.getElementById("count").textContent = "уколов: " + count;
+  buzz("heavy");
+  doll.classList.remove("shake"); void doll.offsetWidth; doll.classList.add("shake");
+
+  const o = document.createElement("div");
+  o.className = "ouch";
+  o.textContent = OUCH[Math.floor(Math.random() * OUCH.length)];
+  o.style.left = (x - box.left) + "px";
+  o.style.top = (y - box.top - 100) + "px";
+  doll.appendChild(o);
+  setTimeout(() => o.remove(), 900);
+}
+
+window.addEventListener("pointermove", moveDrag);
+window.addEventListener("pointerup", endDrag);
+window.addEventListener("pointercancel", () => { dragged?.remove(); dragged = null; });
+
+// --- Вытащить всё ---
+document.getElementById("clearBtn").onclick = () => {
+  pins.innerHTML = "";
+  count = 0;
+  document.getElementById("count").textContent = "уколов: 0";
+  buzz("medium");
+};
+
+// --- Фото на лицо: читаем картинку прямо в телефоне, никуда не отправляем ---
+const file = document.getElementById("file");
+document.getElementById("photoBtn").onclick = () => file.click();
+file.onchange = () => {
+  const f = file.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = document.getElementById("photo");
+    img.setAttribute("href", reader.result);
+    img.style.display = "";
+    document.getElementById("face-drawn").style.display = "none";
+  };
+  reader.readAsDataURL(f);
+};
+</script>
+</body>
+</html>
