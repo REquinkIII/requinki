@@ -68,17 +68,25 @@
   /* --- шапка --- */
   .hero { text-align: center; padding: 14px 0 6px; }
   .ring {
-    width: 148px; height: 148px; margin: 6px auto 16px; border-radius: 50%;
+    width: 148px; height: 148px; margin: 34px auto 36px; border-radius: 50%;
     border: 2px solid var(--neon); box-shadow: var(--glow), inset 0 0 18px rgba(61,123,255,.5);
     padding: 6px; position: relative;
   }
-  .ring::after {   /* полосатый хвост вокруг аватарки */
-    content: ""; position: absolute; inset: -14px; border-radius: 50%;
-    background: repeating-conic-gradient(var(--neon) 0 9deg, transparent 9deg 18deg);
-    -webkit-mask: radial-gradient(circle, transparent 67%, #000 68.5%, #000 74%, transparent 75.5%);
-            mask: radial-gradient(circle, transparent 67%, #000 68.5%, #000 74%, transparent 75.5%);
-    opacity: .85; animation: spin 60s linear infinite;
+  .ring::after {   /* рамка видоискателя: четыре уголка, как в камере */
+    content: ""; position: absolute; inset: -20px; pointer-events: none;
+    --c: var(--neon2);
+    background:
+      linear-gradient(var(--c), var(--c)) top left / 22px 2px, linear-gradient(var(--c), var(--c)) top left / 2px 22px,
+      linear-gradient(var(--c), var(--c)) top right / 22px 2px, linear-gradient(var(--c), var(--c)) top right / 2px 22px,
+      linear-gradient(var(--c), var(--c)) bottom left / 22px 2px, linear-gradient(var(--c), var(--c)) bottom left / 2px 22px,
+      linear-gradient(var(--c), var(--c)) bottom right / 22px 2px, linear-gradient(var(--c), var(--c)) bottom right / 2px 22px;
+    background-repeat: no-repeat; filter: drop-shadow(0 0 4px rgba(61,123,255,.9));
   }
+  .ring::before {   /* «● REC» над рамкой */
+    content: "● REC"; position: absolute; top: -38px; left: -20px; font-family: var(--mono); font-size: 10px;
+    letter-spacing: .15em; color: var(--neon2); text-shadow: 0 0 6px rgba(61,123,255,.9); animation: rec 1.6s steps(1) infinite;
+  }
+  @keyframes rec { 50% { opacity: .25; } }
   .mask {   /* «маска енота» — чёрная полоса с подписью */
     margin: 14px -16px 0; padding: 7px 16px; background: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
     border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
@@ -403,7 +411,9 @@ const ABOUT = "Здравствуйте! Я Ника, работаю под пс
 // пустая ссылка = площадка ещё не готова, показывается «скоро»
 const LINKS = [
   ["Kwork", "", "kwork"],
+  ["Behance", "", "behance"],
   ["TikTok", "", "tiktok"],
+  ["ВКонтакте", "", "vk"],
 ];
 
 /* ===================================================== */
