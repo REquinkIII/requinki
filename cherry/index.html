@@ -470,11 +470,12 @@ const SAVE_KEY = "cb_progress_v1";
 let pos = -1;           // -1 = приветствие
 let reached = -1;       // самый дальний пройденный шаг
 let mistakes = 0;       // всего ошибок в проверках (видят админы)
+let seenMax = -1;       // докуда человек уже читал хоть раз — при повторе после ошибки ждём меньше
 let lastAsked = {};     // какие вопросы были в прошлый раз на этой проверке
 let timer = null, form = {};
 
-function load(){ try{ const s = JSON.parse(localStorage.getItem(SAVE_KEY)||"null"); if(s){ reached=s.reached; mistakes=s.mistakes||0; form=s.form||{}; pos=Math.min(s.pos, reached+1); } }catch(e){} }
-function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify({pos,reached,mistakes,form})); }catch(e){} }
+function load(){ try{ const s = JSON.parse(localStorage.getItem(SAVE_KEY)||"null"); if(s){ reached=s.reached; mistakes=s.mistakes||0; seenMax=s.seenMax ?? s.reached ?? -1; form=s.form||{}; pos=Math.min(s.pos, reached+1); } }catch(e){} }
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify({pos,reached,mistakes,form,seenMax})); }catch(e){} }
 
 const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];} return a; };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -498,8 +499,10 @@ function header(title, kicker, logo){
 
 // «Дальше» открывается, когда текст долистан до конца и прошло время на чтение
 function gateReading(chars){
-  let left = Math.round(Math.min(15, Math.max(10, chars/40)));   // 10–15 секунд в зависимости от длины
-  let scrolled = false;
+  const again = pos <= seenMax;                                   // уже читал(а) до ошибки — 3 с и без долистывания
+  seenMax = Math.max(seenMax, pos); save();
+  let left = again ? 3 : Math.round(Math.min(15, Math.max(10, chars/40)));   // 10–15 секунд в зависимости от длины
+  let scrolled = again;
   const check = () => {
     if (!scrolled && window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 140) scrolled = true;
     if (left > 0){ nextBtn.disabled = true; nextBtn.textContent = `Читай… ${left} с`; }
