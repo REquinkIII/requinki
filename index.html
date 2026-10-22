@@ -446,6 +446,10 @@ const WORKS = [
   { title: "Надёжный хостинг ботов", tag: "linux-сервер · защита от сбоев", img: "img/server-1.jpg",
     imgs: ["img/server-1.jpg", "img/server-backup.jpg"],
     desc: "Три бота сообщества (два Telegram и один Discord) переехали с домашнего ПК на VPS. Каждый работает как служба systemd и сам перезапускается при падении. Отдельный сторож каждые 5 минут проверяет, что боты живы и запущены ровно в одной копии, следит за диском и пишет владельцу в Telegram. Каждую ночь делается бэкап данных, он хранится 14 дней. Токены не попадают в логи." },
+  { title: "Сайт для кофейни (концепт)", tag: "лендинг · адаптив · анимация", img: "img/web-cafe-1.jpg",
+    imgs: ["img/web-cafe-1.jpg", "img/web-cafe-2.jpg", "img/web-cafe-3.jpg", "img/web-cafe-4.jpg"],
+    demo: "https://185-125-100-224.sslip.io/coffee-preview/", demoText: "▶ Открыть сайт",
+    desc: "Концепт нового сайта для саратовской кофейни-пекарни вместо шаблона на Тильде. Меню с поиском и вкладками подтягивается из Google Таблицы: сотрудники сами меняют цены, без программиста. Хлеб с карточками-фото и составом, винная карта с проверкой 18+, живой статус «открыто / закрыто» по часам работы, раздел второго заведения в его фирменном цвете, маршрут в одно нажатие. Анимации при прокрутке, отдельно продуманная версия для телефона. Сделано два варианта оформления — нежный и грубый — на одном содержимом." },
   { title: "Этот бот-портфолио", tag: "telegram mini app", img: "img/miniapp.jpg",
     desc: "Мини-приложение с услугами, работами, формой заявки и контактами. Заявка приходит прямо в Telegram, ответ уходит клиенту через бота." },
   { title: "Логотип: енот-R", tag: "брендинг", img: "img/logo-raccoon-card.svg",
@@ -629,7 +633,8 @@ function openWork(i) {
   document.getElementById("m-desc").textContent = w.desc;
   const d = document.getElementById("m-demo");
   d.style.display = w.demo ? "block" : "none";
-  d.onclick = () => { location.href = w.demo; };
+  d.textContent = w.demoText || "▶ Попробовать демо";
+  d.onclick = () => { if (/^https?:/.test(w.demo) && tg) tg.openLink(w.demo); else location.href = w.demo; };
   document.getElementById("modal").classList.add("on");
 }
 function closeWork() { document.getElementById("modal").classList.remove("on"); document.getElementById("m-media").innerHTML = ""; }
