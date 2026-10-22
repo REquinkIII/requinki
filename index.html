@@ -209,6 +209,10 @@
   @keyframes flash { 30% { box-shadow: 0 0 0 2px var(--neon), 0 0 18px rgba(61,123,255,.7); } }
 
   /* --- портфолио --- */
+  .cats { display: flex; gap: 8px; margin: -2px 0 14px; overflow-x: auto; }
+  .cats button { flex: none; background: transparent; border: 1px solid var(--line); color: var(--muted); cursor: pointer;
+                 font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; padding: 8px 12px; }
+  .cats button.on { color: var(--neon2); border-color: var(--neon); background: rgba(61,123,255,.1); box-shadow: 0 0 10px rgba(61,123,255,.35); }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .work {
     border-radius: 0; overflow: hidden; border: 1px solid var(--line);
@@ -324,6 +328,7 @@
   <!-- ===== ПОРТФОЛИО ===== -->
   <section id="s-works">
     <h2>работы</h2>
+    <div class="cats" id="cats"></div>
     <div class="grid" id="works"></div>
   </section>
 
@@ -455,22 +460,30 @@ const SERVICES = [
 
 // img — путь к картинке в папке img/, video — к видео (mp4). Если нет ни того ни другого, будет заглушка.
 const WORKS = [
-  { title: "Сайт для кофейни (концепт)", tag: "лендинг · адаптив · анимация", img: "img/web-cafe-1.jpg",
+  { cat: "Лендинги", title: "Лендинг «Судная ночь»", tag: "мероприятие · готик-винтаж", img: "img/web-judgment-1.jpg",
+    imgs: ["img/web-judgment-1.jpg", "img/web-judgment-2.jpg", "img/web-judgment-3.jpg", "img/web-judgment-4.jpg", "img/web-judgment-5.jpg"],
+    demo: "https://185-125-100-224.sslip.io/halloween-concept/", demoText: "▶ Открыть сайт",
+    desc: "Концепт лендинга для Хэллоуин-вечеринки в стиле старой киноафиши: двойная рамка, контрастные заголовки, программа вечера как сцены фильма. Табло обратного отсчёта до начала, остаток мест, три тарифа в виде бумажных билетов с линией отрыва. Кнопка на билете сама подставляет тариф в форму брони и пересчитывает сумму. Отдельно продуманная версия для телефона." },
+  { cat: "Лендинги", title: "Лендинг студии маникюра «Пион»", tag: "сайт-визитка · editorial", img: "img/web-nails-1.jpg",
+    imgs: ["img/web-nails-1.jpg", "img/web-nails-2.jpg", "img/web-nails-3.jpg", "img/web-nails-4.jpg", "img/web-nails-5.jpg"],
+    demo: "https://185-125-100-224.sslip.io/nails-concept/", demoText: "▶ Открыть сайт",
+    desc: "Концепт сайта-визитки в журнальном стиле: крупная типографика, асимметричная вёрстка, изумрудно-бежевая палитра. Прайс-лист строками, как в журнале, блок о студии с фотографиями и форма записи с проверкой полей. Пример пакета «Эконом»: четыре блока, всё нужное и ничего лишнего." },
+  { cat: "Лендинги", title: "Сайт для кофейни (концепт)", tag: "лендинг · адаптив · анимация", img: "img/web-cafe-1.jpg",
     imgs: ["img/web-cafe-1.jpg", "img/web-cafe-2.jpg", "img/web-cafe-3.jpg", "img/web-cafe-4.jpg"],
     demo: "https://185-125-100-224.sslip.io/coffee-preview/", demoText: "▶ Открыть сайт",
     desc: "Концепт нового сайта для саратовской кофейни-пекарни вместо шаблона на Тильде. Меню с поиском и вкладками подтягивается из Google Таблицы: сотрудники сами меняют цены, без программиста. Хлеб с карточками-фото и составом, винная карта с проверкой 18+, живой статус «открыто / закрыто» по часам работы, раздел второго заведения в его фирменном цвете, маршрут в одно нажатие. Анимации при прокрутке, отдельно продуманная версия для телефона. Сделано два варианта оформления — нежный и грубый — на одном содержимом." },
-  { title: "Бот-маскот для чата клана", tag: "telegram-бот · сервер 24/7", img: "img/mascot-farm.jpg",
+  { cat: "Боты", title: "Бот-маскот для чата клана", tag: "telegram-бот · сервер 24/7", img: "img/mascot-farm.jpg",
     imgs: ["img/mascot-farm.jpg", "img/mascot-live-1.jpg", "img/mascot-live-2.jpg", "img/mascot-attend.jpg"],
     desc: "Живой кот-маскот игрового сообщества. Сам созывает на съёмки по расписанию, отвечает на «когда съёмки?», ведёт явку: берёт отметки из голосового канала Discord, админы проверяют их кнопками, и бот записывает их в Excel-таблицу, а потом сообщает о трёх пропусках подряд и поздравляет за серии. Для участников — фарм и рюкзак с приватными сообщениями, кормёжка и дружба, викторины, вопрос дня, цитатник, сезонные фразы и праздники, анонимные обращения к админам. Работает на своём сервере как служба, с автоперезапуском, ночными бэкапами и уведомлениями о сбоях. Ники участников размыты." },
-  { title: "Бот-анкета для сообщества", tag: "telegram-бот + mini app", img: "img/anketa-app-1.jpg",
+  { cat: "Боты", title: "Бот-анкета для сообщества", tag: "telegram-бот + mini app", img: "img/anketa-app-1.jpg",
     imgs: ["img/anketa-app-1.jpg", "img/anketa-app-2.jpg", "img/anketa-admin.jpg"],
     desc: "Вступление в клан через мини-приложение: человек читает правила по разделам (дальше не пустит, пока не дочитал), проходит проверочные вопросы и заполняет анкету с фото скина. Два маскота-помощника подсказывают по ходу. Готовая анкета приходит админам в отдельную тему: видно, сколько ошибок было в проверках. Под анкетой админы голосуют «Принять / Отклонить», а потом одной кнопкой отправляют кандидату личную ссылку-заявку в чат на 48 часов. Когда человек по ней стучится, бот спрашивает админов, впускать ли, и предупреждает, если ссылку переслали другому. Ответ админа доходит до человека через бота. Ники и данные кандидата размыты." },
-  { title: "Надёжный хостинг ботов", tag: "linux-сервер · защита от сбоев", img: "img/server-1.jpg",
+  { cat: "Боты", title: "Надёжный хостинг ботов", tag: "linux-сервер · защита от сбоев", img: "img/server-1.jpg",
     imgs: ["img/server-1.jpg", "img/server-backup.jpg"],
     desc: "Три бота сообщества (два Telegram и один Discord) переехали с домашнего ПК на VPS. Каждый работает как служба systemd и сам перезапускается при падении. Отдельный сторож каждые 5 минут проверяет, что боты живы и запущены ровно в одной копии, следит за диском и пишет владельцу в Telegram. Каждую ночь делается бэкап данных, он хранится 14 дней. Токены не попадают в логи." },
-  { title: "Этот бот-портфолио", tag: "telegram mini app", img: "img/miniapp.jpg",
+  { cat: "Боты", title: "Этот бот-портфолио", tag: "telegram mini app", img: "img/miniapp.jpg",
     desc: "Мини-приложение с услугами, работами, формой заявки и контактами. Заявка приходит прямо в Telegram, ответ уходит клиенту через бота." },
-  { title: "Логотип: енот-R", tag: "брендинг", img: "img/logo-raccoon-card.svg",
+  { cat: "Дизайн", title: "Логотип: енот-R", tag: "брендинг", img: "img/logo-raccoon-card.svg",
     desc: "Знак для псевдонима REquinki: сидящий енот складывается в букву R, полосатый хвост становится её ногой. Рваный кистевой контур, вектор." },
 ];
 
@@ -670,11 +683,19 @@ function media(w, big) {
   if (w.img) return `<img src="${esc(w.img)}" alt="" loading="lazy">`;
   return `<div class="ph">// скоро<br>${esc(w.tag)}</div>`;
 }
-document.getElementById("works").innerHTML = WORKS.map((w, i) => `
+const CATS = [...new Set(WORKS.map(w => w.cat))];
+let curCat = CATS[0];
+function renderWorks() {
+  document.getElementById("cats").innerHTML = CATS.map(c =>
+    `<button type="button" class="${c === curCat ? "on" : ""}" onclick="pickCat('${esc(c)}')">${esc(c)}</button>`).join("");
+  document.getElementById("works").innerHTML = WORKS.map((w, i) => w.cat !== curCat ? "" : `
   <div class="work" onclick="openWork(${i})">
     <div class="thumb">${media(w, false)}${w.demo ? `<span class="demo-badge">▶ демо</span>` : ""}</div>
     <div class="cap">${esc(w.title)}<small>${esc(w.tag)}</small></div>
   </div>`).join("");
+}
+function pickCat(c) { haptic(); curCat = c; renderWorks(); }
+renderWorks();
 function openWork(i) {
   const w = WORKS[i]; haptic();
   document.getElementById("m-media").innerHTML = (w.imgs || w.img || w.video) ? media(w, true) : "";
