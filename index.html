@@ -636,6 +636,9 @@ const haptic = (t) => { try { tg && tg.HapticFeedback.selectionChanged(); } catc
 const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 // услуги
+// «своя задача» в каждом разделе: для нестандартных просьб, которых нет в прайсе
+const CUSTOM = "Своя задача в этом разделе";
+const CUSTOM_HINT = "Нужно что-то, чего нет в прайсе? Опишите идею — отвечу, возьмусь ли и сколько это будет стоить";
 // «от 3 000 ₽» для заголовка раздела: самая первая цена в рублях
 const fromPrice = (g) => { for (const [, p] of g.items) { const m = /\d[\d\s]*₽/.exec(p); if (m) return "от " + m[0]; } return "договорная"; };
 document.getElementById("services").innerHTML = SERVICES.map((g, gi) => `
@@ -645,6 +648,7 @@ document.getElementById("services").innerHTML = SERVICES.map((g, gi) => `
       <span class="chip">${esc(g.chip)}</span>
       <p style="margin:8px 0 12px">${esc(g.desc)}</p>
       ${g.items.map(([n, p], ii) => `<div class="row" onclick="pickService(${gi}, ${ii})"><span>${esc(n)}</span><span class="price">${esc(p)}</span></div>`).join("")}
+      <div class="row" onclick="pickService(${gi}, -1)"><span>✨ ${CUSTOM}</span><span class="price">по договорённости</span></div>
     </div>
   </div>`).join("");
 function toggleSvc(gi) { haptic(); document.getElementById("svc-" + gi).classList.toggle("open"); }
@@ -653,6 +657,7 @@ function toggleSvc(gi) { haptic(); document.getElementById("svc-" + gi).classLis
 const sel = document.getElementById("f-service");
 sel.innerHTML = SERVICES.map(g => `<optgroup label="${esc(g.group)}">` +
     g.items.map(([n, , hint]) => `<option value="${esc(g.group)}: ${esc(n)}" data-hint="${esc(hint || "")}">${esc(n)}</option>`).join("") +
+    `<option value="${esc(g.group)}: ${CUSTOM.toLowerCase()}" data-hint="${CUSTOM_HINT}">✨ ${CUSTOM}</option>` +
   `</optgroup>`).join("")
   + `<option value="Другое" data-hint="Расскажите, что нужно, своими словами">Другое</option>`;
 // подсказка в поле «Опишите задачу» зависит от выбранной услуги
@@ -663,7 +668,7 @@ sel.addEventListener("change", updateHint); updateHint();
 // выбрать услугу и перейти в заявку (из ленты — первая услуга раздела)
 function pickService(gi, ii = 0) {
   const g = SERVICES[gi]; if (!g) return;
-  sel.value = `${g.group}: ${g.items[ii][0]}`; updateHint();
+  sel.value = `${g.group}: ${ii < 0 ? CUSTOM.toLowerCase() : g.items[ii][0]}`; updateHint();
   go("order");
   sel.classList.remove("flash"); void sel.offsetWidth; sel.classList.add("flash");
 }
