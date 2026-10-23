@@ -16,7 +16,11 @@ body{font:14px/1.55 var(--mono)!important;background:var(--bg)!important}
 .bg .vign{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 30%,transparent 55%,rgba(0,0,0,.75) 100%)}
 
 /* ---------- шапка ---------- */
-.hud{font-family:var(--mono)!important;text-transform:uppercase;letter-spacing:.08em}
+.hud{font-family:var(--mono)!important;text-transform:uppercase;letter-spacing:.04em}
+/* верхняя строка: две колонки с зазором, правая прижата вправо и при нехватке места переносится аккуратно */
+.hud-top{gap:14px;font-size:10px!important;align-items:flex-start}
+.hud-top span:first-child{flex:none}
+.hud-top span:last-child{text-align:right}
 h1{font:600 46px/1 var(--display)!important;letter-spacing:.04em!important;padding-left:0!important}
 .tagline{font:400 13px/1.4 var(--mono)!important;letter-spacing:.06em;color:var(--ink)!important;opacity:.8}
 .mask{font-family:var(--mono)!important}

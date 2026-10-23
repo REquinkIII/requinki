@@ -22,7 +22,7 @@
     var p = function (n) { return (n < 10 ? "0" : "") + n; };
     var tick = function () {
       var d = new Date(), m = new Date(d.getTime() + (d.getTimezoneOffset() + 180) * 60000);
-      clock.textContent = p(m.getHours()) + ":" + p(m.getMinutes()) + ":" + p(m.getSeconds());
+      clock.textContent = p(m.getHours()) + ":" + p(m.getMinutes());   // без секунд — короче строка
     };
     tick(); setInterval(tick, 1000);
   }
