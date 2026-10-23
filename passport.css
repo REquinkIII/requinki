@@ -1,0 +1,85 @@
+/* ================= Паспорт стиля: REquinki — «ночной синий постер» =================
+   Остаётся: неоновый синий, енот, заставка с глазом, плёнка, лента, «keep your masks on».
+   Меняется подача: постерные заголовки, свет только от источника, редакционные номера,
+   служебный текст, острые рамки-видоискатели, «ошибки системы». Слой поверх основного стиля. */
+
+:root{
+  --bg:#02040b; --ink:#dfe6ff; --muted:#6f7da6; --line:rgba(80,130,255,.22);
+  --display:'Oswald','Arial Narrow',sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace; --serif:'Playfair Display',Georgia,serif;
+}
+body{font:14px/1.55 var(--mono)!important;background:var(--bg)!important}
+
+/* фон: вместо сетки и размытых пятен — один луч света сверху и тёмные края */
+.bg::before{background:
+  linear-gradient(180deg,rgba(61,123,255,.20),rgba(61,123,255,0) 70%) top center/100% 100% no-repeat!important;
+  clip-path:polygon(38% 0,62% 0,100% 78%,0 78%);filter:blur(6px)}
+.bg .vign{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 30%,transparent 55%,rgba(0,0,0,.75) 100%)}
+
+/* ---------- шапка ---------- */
+.hud{font-family:var(--mono)!important;text-transform:uppercase;letter-spacing:.08em}
+h1{font:600 46px/1 var(--display)!important;letter-spacing:.04em!important;padding-left:0!important}
+.tagline{font:italic 500 18px/1.3 var(--serif)!important;color:var(--ink)!important;opacity:.85}
+.mask{font-family:var(--mono)!important}
+.tape button{font-family:var(--mono)!important}
+
+/* ---------- заголовки разделов — как постер ---------- */
+h2{position:relative;display:block!important;margin:38px 0 18px!important;padding-top:20px;
+   font:700 54px/.9 var(--display)!important;letter-spacing:.01em!important;text-transform:uppercase;color:var(--ink)!important;
+   text-shadow:0 0 22px rgba(61,123,255,.45)}
+h2::after{content:attr(data-t)!important;position:absolute;left:0;top:20px;z-index:-1;flex:none!important;height:auto!important;width:auto!important;
+   background:none!important;color:transparent;-webkit-text-stroke:1px rgba(127,168,255,.45);font:inherit;transform:translate(7px,8px);text-shadow:none}
+h2::before{position:absolute;top:0;left:0;width:auto!important;height:auto!important;background:none!important;box-shadow:none!important;
+   content:attr(data-idx);font:400 10px var(--mono);letter-spacing:.14em;color:var(--neon2)}
+
+/* ---------- карточки: острая рамка с уголками видоискателя, без мягких теней ---------- */
+.card{background:rgba(3,6,16,.7)!important;box-shadow:none!important;backdrop-filter:none!important;
+  --c:var(--neon2);
+  background-image:
+    linear-gradient(var(--c),var(--c)),linear-gradient(var(--c),var(--c)),
+    linear-gradient(var(--c),var(--c)),linear-gradient(var(--c),var(--c)),
+    linear-gradient(var(--c),var(--c)),linear-gradient(var(--c),var(--c)),
+    linear-gradient(var(--c),var(--c)),linear-gradient(var(--c),var(--c))!important;
+  background-size:12px 1px,1px 12px,12px 1px,1px 12px,12px 1px,1px 12px,12px 1px,1px 12px!important;
+  background-position:0 0,0 0,100% 0,100% 0,0 100%,0 100%,100% 100%,100% 100%!important;
+  background-repeat:no-repeat!important}
+.card::before{display:none!important}
+.card h3{font:600 18px var(--display);text-transform:uppercase;letter-spacing:.04em}
+.card p{font-size:13px}
+
+/* прайс: номера разделов крупно, как в журнале */
+#services{counter-reset:svc}
+.svc{counter-increment:svc}
+.svc-head{font:600 20px var(--display)!important;text-transform:uppercase;letter-spacing:.05em;padding:16px!important;gap:12px!important}
+.svc-head::before{content:counter(svc,decimal-leading-zero);font:400 11px var(--mono);color:var(--neon2);letter-spacing:.1em;align-self:flex-start;margin-top:3px}
+.svc-head .arr{order:3}
+.svc-head .from{font:12px var(--mono)!important}
+.row span:first-child{font-size:13px}
+.price{font-family:var(--mono)!important}
+
+/* работы */
+.cats button{font-family:var(--mono)!important}
+.grid{counter-reset:wk}
+.work{counter-increment:wk}
+.work .cap{font:600 15px var(--display)!important;text-transform:uppercase;letter-spacing:.04em}
+.work .cap::before{content:"№" counter(wk,decimal-leading-zero) " ";font:400 10px var(--mono);color:var(--neon2);letter-spacing:.08em}
+.work .cap small{font-family:var(--mono)!important;text-transform:none;letter-spacing:0}
+.modal h3{font:700 32px/1 var(--display);text-transform:uppercase}
+
+/* форма и кнопки */
+label{font-family:var(--mono)!important}
+input,select,textarea{font:14px var(--mono)!important;background:#02040b!important}
+.btn{font:600 16px var(--display)!important;text-transform:uppercase;letter-spacing:.16em}
+.btn.ghost{font-family:var(--display)!important}
+.err:not(:empty)::before{content:"ERROR 400 // ";color:#ff4d7a;font-weight:600}
+.done .big{font:600 22px var(--display)!important;letter-spacing:.06em!important;text-transform:uppercase}
+.done .big::before{content:"200 OK";display:block;font:400 11px var(--mono);letter-spacing:.2em;color:var(--muted);margin-bottom:6px}
+
+/* обо мне */
+#about p{font:italic 500 18px/1.45 var(--serif);color:var(--ink)!important}
+.links a{background:rgba(3,6,16,.7)!important;font:600 16px var(--display);text-transform:uppercase;letter-spacing:.05em}
+
+/* меню */
+nav button{font:400 10px var(--mono)!important;letter-spacing:.12em;text-transform:uppercase}
+
+/* живые часы в шапке */
+.clock{color:var(--neon2)}

@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>REquinki</title>
+<link rel="icon" href="img/logo-raccoon-card.svg">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #020203;
+    --bg2: #07080c;
+    --card: rgba(8, 9, 14, .82);
+    --line: rgba(80, 130, 255, .2);
+    --stripes: repeating-linear-gradient(90deg, var(--neon) 0 14px, #020203 14px 24px);
+    --neon: #3d7bff;
+    --neon2: #7fa8ff;
+    --text: #dfe6ff;
+    --muted: #7d89ad;
+    --glow: 0 0 12px rgba(61, 123, 255, .65), 0 0 32px rgba(61, 123, 255, .35);
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.5 Inter, system-ui, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* --- фон: сетка, точки, плёнка --- */
+  .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .bg::before {
+    content: ""; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse at 50% 12%, rgba(40, 80, 220, .26), transparent 50%),
+      radial-gradient(ellipse at 100% 100%, rgba(30, 60, 180, .12), transparent 45%),
+      linear-gradient(rgba(80,130,255,.035) 1px, transparent 1px) 0 0 / 28px 28px,
+      linear-gradient(90deg, rgba(80,130,255,.035) 1px, transparent 1px) 0 0 / 28px 28px;
+  }
+  .bg::after {   /* «шерсть»: шум поверх всего фона */
+    content: ""; position: absolute; inset: 0; opacity: .09; mix-blend-mode: screen;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .65 0 0 0 0 1 0 0 0 1.4 -.4'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .film {   /* плёнка: перфорация сверху/снизу + кадры, едет по кругу */
+    position: absolute; width: 160%; height: 46px; left: -30%;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 6px, rgba(2,2,3,.95) 6px 14px) 0 0 / 14px 7px repeat-x,
+      repeating-linear-gradient(90deg, transparent 0 6px, rgba(2,2,3,.95) 6px 14px) 0 100% / 14px 7px repeat-x,
+      repeating-linear-gradient(90deg, rgba(18,30,72,.6) 0 58px, rgba(2,2,3,.9) 58px 62px) 0 0 / 62px 100% repeat-x;
+    border-top: 1px solid rgba(110,150,255,.35); border-bottom: 1px solid rgba(110,150,255,.35);
+    opacity: .45; animation: reel 14s linear infinite;
+  }
+  @keyframes reel { to { background-position: -434px 0, -434px 100%, -434px 0; } }   /* 434 = 14 × 31 = 62 × 7 */
+  .film.f1 { top: 120px; transform: rotate(-32deg); }
+  .film.f2 { top: 70%; transform: rotate(-32deg); opacity: .3; animation-duration: 22s; animation-direction: reverse; }
+  @media (prefers-reduced-motion: reduce) { .film { animation: none; } }
+
+  .wrap { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; padding: 18px 16px 110px; }
+
+  /* --- HUD-подписи --- */
+  .hud { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .04em; }
+  .hud b { color: var(--neon2); font-weight: 600; }
+  .hud-top { display: flex; justify-content: space-between; margin-bottom: 10px; }
+
+  /* --- шапка --- */
+  .hero { text-align: center; padding: 46px 0 6px; }
+  .ring {
+    width: 148px; height: 148px; margin: 34px auto 36px; border-radius: 50%;
+    border: 2px solid var(--neon); box-shadow: var(--glow), inset 0 0 18px rgba(61,123,255,.5);
+    padding: 6px; position: relative;
+  }
+  .ring::after {   /* рамка видоискателя: четыре уголка, как в камере */
+    content: ""; position: absolute; inset: -20px; pointer-events: none;
+    --c: var(--neon2);
+    background:
+      linear-gradient(var(--c), var(--c)) top left / 22px 2px, linear-gradient(var(--c), var(--c)) top left / 2px 22px,
+      linear-gradient(var(--c), var(--c)) top right / 22px 2px, linear-gradient(var(--c), var(--c)) top right / 2px 22px,
+      linear-gradient(var(--c), var(--c)) bottom left / 22px 2px, linear-gradient(var(--c), var(--c)) bottom left / 2px 22px,
+      linear-gradient(var(--c), var(--c)) bottom right / 22px 2px, linear-gradient(var(--c), var(--c)) bottom right / 2px 22px;
+    background-repeat: no-repeat; filter: drop-shadow(0 0 4px rgba(61,123,255,.9));
+  }
+  .ring::before {   /* «● REC» над рамкой */
+    content: "● REC"; position: absolute; top: -38px; left: -20px; font-family: var(--mono); font-size: 10px;
+    letter-spacing: .15em; color: var(--neon2); text-shadow: 0 0 6px rgba(61,123,255,.9); animation: rec 1.6s steps(1) infinite;
+  }
+  @keyframes rec { 50% { opacity: .25; } }
+  .mask {   /* «маска енота» — чёрная полоса с подписью */
+    margin: 14px -16px 0; padding: 7px 16px; background: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+    border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--neon2);
+    text-shadow: 0 0 8px rgba(61,123,255,.7);
+  }
+  .ring img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  h1 {
+    font-family: Inter, sans-serif; font-weight: 600; font-size: 40px; margin: 0 0 10px;
+    letter-spacing: .12em; padding-left: .12em; text-shadow: 0 0 18px rgba(61,123,255,.55);
+    display: inline-flex; align-items: center; gap: 14px;
+  }
+  h1 img { height: 92px; letter-spacing: 0; filter: drop-shadow(0 0 6px rgba(61,123,255,.8)); }
+  .tagline { color: var(--muted); margin: 4px 0 0; }
+
+  /* ник печатается, как в строке ввода, потом мигает курсор */
+  .type { position: relative; display: inline-block; text-align: left; }
+  .type .ghost { visibility: hidden; }            /* держит ширину, чтобы логотип не ездил */
+  .type .typed { position: absolute; left: 0; top: 0; white-space: nowrap; }
+  .type .typed::after {
+    content: ""; display: inline-block; width: 3px; height: .9em; margin-left: 4px; vertical-align: -.08em;
+    background: var(--neon2); box-shadow: 0 0 8px var(--neon), 0 0 16px var(--neon); animation: caret 1s steps(1) infinite;
+  }
+  .type.busy .typed::after { animation: none; }   /* пока печатает — курсор горит ровно */
+  @keyframes caret { 50% { opacity: 0; } }
+
+  /* ===== заставка при входе =====
+     Рисуется отдельным векторным слоем .splash (чтобы глаз на весь экран был чётким):
+     глаз светится → вокруг обрисовывается енот → он уменьшается ровно на место логотипа в шапке →
+     s4: печатается ник, свечение глаза гаснет → s5: подпись и «маска» → класс intro снимается. */
+  .logo { display: inline-block; line-height: 0; }
+  .splash { position: fixed; inset: 0; z-index: 30; pointer-events: none; }
+  .splash svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .splash { transition: opacity .35s; }
+  body:not(.intro) .splash { opacity: 0; }
+  .logo img { transition: opacity .35s; }
+  body.intro .logo img { opacity: 0; }
+  body.intro:not(.s4) .type .typed::after { visibility: hidden; }
+  body.intro:not(.s5) .tagline, body.intro:not(.s5) .mask { opacity: 0; transform: translateY(6px); }
+  .tagline, .mask { transition: opacity .6s ease, transform .6s ease; }
+  body.intro .bg::before { opacity: .35; }
+  .bg::before { transition: opacity 1s; }
+
+  .hero { transition: transform .8s cubic-bezier(.6,.05,.25,1); }
+  body.intro .hero { transform: translateY(var(--dy, 30vh)) scale(1.2); }
+  .hud-top, section, nav, .foot, .film { transition: opacity .7s ease .25s, transform .7s ease .25s; }
+  body.intro .hud-top, body.intro section, body.intro .foot, body.intro .film { opacity: 0; }
+  body.intro nav { opacity: 0; transform: translateY(100%); }
+  body.intro { overflow: hidden; }
+  .glitch { animation: glitch 6s infinite steps(1); }
+  @keyframes glitch {
+    0%, 96%, 100% { transform: none; text-shadow: 0 0 18px rgba(61,123,255,.55); }
+    97% { transform: translateX(-2px); text-shadow: 2px 0 #ff2a6d, -2px 0 #3d7bff; }
+    98% { transform: translateX(2px); text-shadow: -2px 0 #ff2a6d, 2px 0 #3d7bff; }
+  }
+
+  /* --- секции --- */
+  section { display: none; animation: fade .25s ease; }
+  section.on { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } }
+  h2 {
+    font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--neon2);
+    text-transform: uppercase; letter-spacing: .12em; margin: 26px 0 12px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2::before { content: ""; width: 34px; height: 6px; flex: none; background: var(--stripes); border-radius: 0;
+               box-shadow: 0 0 8px rgba(61,123,255,.5); }
+  h2::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, var(--line), transparent); }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 0;
+    padding: 16px; margin-bottom: 12px; backdrop-filter: blur(6px); position: relative; overflow: hidden;
+    box-shadow: inset 0 1px 0 rgba(127,168,255,.25), 0 10px 30px rgba(0,0,0,.6);
+  }
+  .card::before { content: ""; position: absolute; left: 16px; right: 16px; top: 0; height: 1px;
+                  background: linear-gradient(90deg, transparent, var(--neon), transparent); opacity: .8; }
+  .card h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; }
+  .card p { margin: 0; color: var(--muted); font-size: 14px; }
+  .price { font-family: var(--mono); color: var(--neon2); font-weight: 600; flex: none; max-width: 48%; text-align: right; }   /* длинная цена переносится, а не вылезает за рамку */
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .row + .row { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
+  .chip {
+    display: inline-block; font-family: var(--mono); font-size: 10px; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--neon2); border: 1px solid var(--line);
+    border-radius: 0; padding: 2px 8px; margin-bottom: 8px;
+  }
+  .note { font-size: 13px; color: var(--muted); }
+
+  /* --- лента направлений под «маской»: едет сама, нажатие — сразу в заявку --- */
+  .tape { margin: 10px -16px 0; overflow: hidden; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+          background: rgba(61,123,255,.06); -webkit-mask: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+          mask: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+  .tape-track { display: flex; width: max-content; animation: tape 26s linear infinite; }
+  .tape:hover .tape-track, .tape.hold .tape-track { animation-play-state: paused; }
+  @keyframes tape { to { transform: translateX(-50%); } }
+  .tape button { background: none; border: 0; cursor: pointer; padding: 10px 14px; display: flex; align-items: center; gap: 14px;
+                 font: 600 12px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--text); white-space: nowrap; }
+  .tape button::after { content: "//"; color: var(--neon); opacity: .6; }
+  .tape button:hover, .tape button:active { color: var(--neon2); text-shadow: 0 0 8px rgba(61,123,255,.9); }
+  @media (prefers-reduced-motion: reduce) { .tape { overflow-x: auto; } .tape-track { animation: none; } }
+  body.intro:not(.s5) .tape { opacity: 0; }
+  .tape { transition: opacity .6s ease .15s; }
+
+  /* --- прайс свёрнут: видно раздел и цену «от», по нажатию раскрывается --- */
+  .svc { padding: 0; }
+  .svc-head { width: 100%; background: none; border: 0; color: var(--text); cursor: pointer; text-align: left;
+              display: flex; align-items: center; gap: 10px; padding: 14px 16px; font: 600 15px Inter, sans-serif; }
+  .svc-head .from { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--neon2); white-space: nowrap; }
+  .svc-head .arr { font-family: var(--mono); color: var(--muted); transition: transform .2s; }
+  .svc.open .svc-head .arr { transform: rotate(90deg); color: var(--neon2); }
+  .svc-body { display: none; padding: 0 16px 16px; }
+  .svc.open .svc-body { display: block; animation: fade .2s ease; }
+  .svc .row { cursor: pointer; }
+  .svc .row:active span:first-child { color: var(--neon2); }
+  .svc .chip { margin: 0; }
+  .flash { animation: flash 1s ease; }
+  @keyframes flash { 30% { box-shadow: 0 0 0 2px var(--neon), 0 0 18px rgba(61,123,255,.7); } }
+
+  /* --- портфолио --- */
+  .cats { display: flex; gap: 8px; margin: -2px 0 14px; overflow-x: auto; }
+  .cats button { flex: none; background: transparent; border: 1px solid var(--line); color: var(--muted); cursor: pointer;
+                 font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; padding: 8px 12px; }
+  .cats button.on { color: var(--neon2); border-color: var(--neon); background: rgba(61,123,255,.1); box-shadow: 0 0 10px rgba(61,123,255,.35); }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .work {
+    border-radius: 0; overflow: hidden; border: 1px solid var(--line);
+    background: var(--bg2); cursor: pointer; position: relative; transition: border-color .2s, box-shadow .2s;
+  }
+  .work:active { border-color: var(--neon); box-shadow: 0 0 14px rgba(61,123,255,.45); }
+  .work .cap { border-top: 1px solid var(--line); }
+  .work .thumb { aspect-ratio: 1; display: grid; place-items: center; overflow: hidden; }
+  .work .thumb img, .work .thumb video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .work .ph {
+    width: 100%; height: 100%; display: grid; place-items: center; text-align: center;
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    background: radial-gradient(circle, rgba(61,123,255,.18), transparent 70%);
+  }
+  .demo-badge {
+    position: absolute; top: 8px; right: 8px; font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
+    background: rgba(4,6,13,.85); color: var(--neon2); border: 1px solid var(--neon); border-radius: 0;
+    padding: 3px 8px; box-shadow: 0 0 10px rgba(61,123,255,.6);
+  }
+  .work .thumb img { object-position: top; }
+  .gal { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; }
+  /* align-items: flex-start — иначе флекс растягивает все скрины до высоты самого длинного */
+  .gal { align-items: flex-start; }
+  .modal .gal img { flex: 0 0 78%; width: 78%; height: auto; max-height: 75vh; object-fit: contain;
+                    object-position: top; background: #000; scroll-snap-align: center; }
+  .gal-hint { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: right; margin-top: 4px; }
+  .work .cap { padding: 8px 10px; font-size: 13px; }
+  .work .cap small { display: block; color: var(--muted); font-family: var(--mono); font-size: 10px; }
+  .modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,.94); z-index: 20; display: none;
+    padding: 20px 16px; overflow: auto;
+  }
+  .modal.on { display: block; }
+  .modal .box { max-width: 520px; margin: 0 auto; }
+  .modal img, .modal video { width: 100%; border-radius: 0; border: 1px solid var(--line); display: block; }
+  .modal h3 { margin: 14px 0 4px; }
+  .modal p { color: var(--muted); margin: 0 0 16px; }
+
+  /* --- форма --- */
+  label { display: block; font-family: var(--mono); font-size: 11px; color: var(--muted);
+          text-transform: uppercase; letter-spacing: .08em; margin: 14px 0 6px; }
+  input, select, textarea {
+    width: 100%; background: #050608; color: var(--text); font: inherit;
+    border: 1px solid var(--line); border-radius: 0; padding: 11px 12px; outline: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--neon); box-shadow: 0 0 0 3px rgba(61,123,255,.2); }
+  textarea { min-height: 110px; resize: vertical; }
+  .btn {
+    display: block; width: 100%; margin-top: 18px; padding: 14px; border: 0; border-radius: 0;
+    background: var(--neon); color: #02030a; font: 700 15px Inter, sans-serif; cursor: pointer; letter-spacing: .02em;
+    box-shadow: var(--glow);
+  }
+  .btn:active { transform: scale(.98); }
+  .btn.ghost { background: transparent; border: 1px solid var(--neon); box-shadow: none; color: var(--neon2); }
+  .err { color: #ff6b8b; font-size: 13px; margin-top: 8px; min-height: 1em; }
+  .done { text-align: center; padding: 30px 10px; }
+  .done .big { font-family: var(--mono); color: var(--neon2); font-size: 13px; letter-spacing: .1em; }
+
+  /* --- контакты --- */
+  .links a {
+    display: flex; justify-content: space-between; align-items: center; text-decoration: none;
+    color: var(--text); padding: 13px 14px; border: 1px solid var(--line); border-radius: 0;
+    margin-bottom: 8px; background: var(--card);
+  }
+  .links a span { font-family: var(--mono); font-size: 12px; color: var(--neon2); }
+  .links a.off { opacity: .55; border-style: dashed; }
+  .links a.off span { color: var(--muted); }
+
+  /* --- нижнее меню --- */
+  nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+    display: flex; justify-content: center; gap: 4px;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+    background: rgba(0,0,0,.9); border-top: 1px solid var(--line); backdrop-filter: blur(10px);
+  }
+  nav button {
+    flex: 1; max-width: 130px; background: none; border: 0; color: var(--muted); cursor: pointer;
+    font: 500 11px Inter, sans-serif; padding: 6px 0; border-radius: 0;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+  }
+  nav button svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.7; }
+  nav button { position: relative; }
+  nav button.on { color: var(--neon2); background: rgba(61,123,255,.08); }
+  nav button.on::after { content: ""; position: absolute; left: 30%; right: 30%; bottom: 0; height: 3px;
+                         background: var(--stripes); background-size: 12px 100%; border-radius: 0; }
+  nav button.on svg { filter: drop-shadow(0 0 6px rgba(61,123,255,.8)); }
+
+  .foot { text-align: center; margin-top: 30px; }
+</style>
+<link rel="stylesheet" href="fonts/fonts.css?v=1">
+<link rel="stylesheet" href="passport.css?v=2">
+<meta name="robots" content="noindex">
+</head>
+<body class="intro">
+<div class="splash" id="splash"></div>
+<div class="bg"><div class="film f1"></div><div class="film f2"></div></div>
+
+<div class="wrap">
+  <div class="hud hud-top"><span>//requinki.exe</span><span>mood: <b>grumpy</b> · status: <b>online</b></span></div>
+
+  <div class="hero" id="hero">
+    <h1 class="glitch"><span class="logo"><img src="img/logo-raccoon.svg" alt="" id="logoImg"></span><span class="type" aria-label="REquinki"><span class="ghost">REquinki</span><span class="typed" id="typed"></span></span></h1>
+    <p class="tagline">сайты · Telegram-боты · 3D и графика</p>
+    <div class="mask">keep your masks on</div>
+    <div class="tape" id="tape"><div class="tape-track" id="tapeTrack"></div></div>
+  </div>
+
+  <!-- ===== УСЛУГИ ===== -->
+  <section id="s-services" class="on">
+    <h2>услуги и цены</h2>
+    <div id="services"></div>
+    <p class="note">Цены стартовые. Точную сумму назову, когда увижу задачу. Нажмите на услугу — она сразу подставится в заявку.</p>
+    <button class="btn" onclick="go('order')">Оставить заявку</button>
+  </section>
+
+  <!-- ===== ПОРТФОЛИО ===== -->
+  <section id="s-works">
+    <h2>работы</h2>
+    <div class="cats" id="cats"></div>
+    <div class="grid" id="works"></div>
+  </section>
+
+  <!-- ===== ЗАЯВКА ===== -->
+  <section id="s-order">
+    <h2>заявка</h2>
+    <div class="card" id="order-form">
+      <label for="f-service">Что нужно</label>
+      <select id="f-service"></select>
+
+      <label for="f-task">Опишите задачу</label>
+      <textarea id="f-task" placeholder="Например: превью для симулятора, стиль как у ..., нужно к пятнице"></textarea>
+
+      <label for="f-budget">Бюджет (необязательно)</label>
+      <input id="f-budget" placeholder="например, 5 000 ₽">
+
+      <label for="f-deadline">Когда нужно (необязательно)</label>
+      <input id="f-deadline" placeholder="к 15 октября">
+
+      <div class="err" id="f-err"></div>
+      <button class="btn" onclick="sendOrder()">Отправить</button>
+    </div>
+    <div class="card done" id="order-done" style="display:none">
+      <div class="big">// заявка отправлена</div>
+      <p style="margin-top:10px">Отвечу прямо в этом чате.</p>
+    </div>
+  </section>
+
+  <!-- ===== ОБО МНЕ ===== -->
+  <section id="s-about">
+    <h2>обо мне</h2>
+    <div class="card" id="about"></div>
+    <h2>контакты</h2>
+    <div class="links" id="links"></div>
+  </section>
+
+  <div class="hud foot">// енот на связи, но не всегда рад 🦝<br>//identity.exe</div>
+</div>
+
+<div class="modal" id="modal" onclick="if(event.target===this)closeWork()">
+  <div class="box">
+    <div id="m-media"></div>
+    <h3 id="m-title"></h3>
+    <p id="m-desc"></p>
+    <button class="btn" id="m-demo" style="display:none">▶ Попробовать демо</button>
+    <button class="btn ghost" onclick="closeWork()">Закрыть</button>
+  </div>
+</div>
+
+<nav>
+  <button data-tab="services" class="on" onclick="go('services')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 9h10M7 13h6"/></svg>Услуги</button>
+  <button data-tab="works" onclick="go('works')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M3 15h18M7 5v4M12 5v4M17 5v4M7 15v4M12 15v4M17 15v4"/></svg>Работы</button>
+  <button data-tab="order" onclick="go('order')">
+    <svg viewBox="0 0 24 24"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg>Заявка</button>
+  <button data-tab="about" onclick="go('about')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Обо мне</button>
+</nav>
+
+<script>
+/* =====================================================
+   ВСЁ, ЧТО МОЖНО МЕНЯТЬ БЕЗ КОДА, — В ЭТОМ БЛОКЕ
+   ===================================================== */
+
+const SERVICES = [
+  {
+    group: "Сайты",
+    chip: "web",
+    desc: "Лендинги с анимацией и удобной версией для телефона. Домен и хостинг оформляются на вас — сайт полностью ваш.",
+    items: [
+      ["Сайт-визитка: 1 страница, до 4 блоков, контакты и карта", "от 3 000 ₽", "Например: мастер маникюра — услуги, цены, адрес, кнопка записи в Telegram"],
+      ["Лендинг до 8 блоков с анимацией + заявки в Telegram", "от 7 000 ₽", "Например: студия танцев — направления, тренеры, расписание, форма записи"],
+      ["Сайт для кафе / магазина: меню или каталог из Google Таблицы, вы сами меняете цены", "от 15 000 ₽", "Например: кофейня — меню с поиском, винная карта, часы работы, маршрут"],
+      ["Запуск под ключ: домен, хостинг, подключение", "+1 000 ₽", "Например: перенести сайт с Тильды на свой домен"],
+      ["Поддержка: правки текстов, цен и фото", "500 ₽/мес", "Например: раз в месяц обновить сезонное меню и фото"],
+      ["3D-модель на странице (крутится в браузере)", "договорная", "Например: модель товара, которую можно покрутить на сайте"],
+    ],
+  },
+  {
+    group: "Telegram",
+    chip: "python",
+    desc: "Боты и мини-приложения: меню, анкеты, приём заявок, учёт. Заявки приходят вам в чат, отвечаете прямо оттуда.",
+    items: [
+      ["Бот-визитка: меню до 5 кнопок", "500 ₽", "Например: бот для студии маникюра, кнопки: прайс, запись, адрес, отзывы"],
+      ["Анкета или заявка + ответ клиенту через бота", "1 500 ₽", "Например: анкета для набора в команду, 8 вопросов, ответы приходят админам"],
+      ["Всё выше + автопроверка, рассылка, автоперезапуск", "3 000 ₽", "Например: отклонять анкеты короче 300 символов, рассылка раз в неделю"],
+      ["Бот + таблица: учёт, отчёты (Excel / OneDrive)", "от 3 000 ₽", "Например: учёт посещаемости участников, отчёт за месяц"],
+      ["Мини-приложение внутри бота", "от 3 000 ₽", "Например: каталог с формой заказа, как в этом боте"],
+    ],
+  },
+  {
+    group: "3D",
+    chip: "blender",
+    desc: "Рендеры, сплэш-арты и модели в Blender.",
+    items: [
+      ["Рендеры, сплэш-арты, модели", "от 1 000 ₽", "Например: рендер персонажа для обложки или модель товара для сайта"],
+    ],
+  },
+  {
+    group: "Дизайн",
+    chip: "photoshop",
+    desc: "Аватарки, обложки, оформление соцсетей и каналов.",
+    items: [
+      ["Аватарка или обложка", "договорная", "Например: аватарка для TikTok в тёмном неоне, референс приложу"],
+      ["Ретушь и цветокор фото, оформление соцсетей и каналов", "от 500 ₽", "Например: оформление канала: аватар, баннер, шаблоны постов"],
+    ],
+  },
+  {
+    group: "Моушн и монтаж",
+    chip: "after effects",
+    desc: "Эдиты, анимация, монтаж роликов под TikTok, Shorts и YouTube, Lottie-анимация для сайтов и приложений.",
+    items: [
+      ["Эдит / анимация", "договорная", "Например: вертикальный эдит 15 сек под трек"],
+      ["Монтаж роликов, субтитры, цветокор", "от 500 ₽/мин", "Например: влог 10 мин, убрать паузы, субтитры, музыка"],
+      ["Ролики с 3D-камерой", "договорная", "Например: пролёт камеры по сцене для заставки канала"],
+      ["Lottie-анимация: иконки, кнопки, лоадеры", "от 500 ₽", "Например: 4 анимированные иконки для меню сайта"],
+    ],
+  },
+  {
+    group: "Автоматизация",
+    chip: "claude",
+    desc: "Связываю Blender, After Effects и код, поэтому серии роликов и однотипные задачи делаю быстрее и дешевле.",
+    items: [
+      ["Серии однотипных роликов и задач", "договорная", "Например: 50 одинаковых роликов с разными именами"],
+    ],
+  },
+];
+
+// img — путь к картинке в папке img/, video — к видео (mp4). Если нет ни того ни другого, будет заглушка.
+const WORKS = [
+  { cat: "Лендинги", title: "Лендинг «Судная ночь»", tag: "мероприятие · готик-винтаж", img: "img/web-judgment-1.jpg",
+    imgs: ["img/web-judgment-1.jpg", "img/web-judgment-2.jpg", "img/web-judgment-3.jpg", "img/web-judgment-4.jpg", "img/web-judgment-5.jpg"],
+    demo: "https://185-125-100-224.sslip.io/halloween-concept/", demoText: "▶ Открыть сайт",
+    desc: "Концепт лендинга для Хэллоуин-вечеринки в стиле старой киноафиши: двойная рамка, контрастные заголовки, программа вечера как сцены фильма. Табло обратного отсчёта до начала, остаток мест, три тарифа в виде бумажных билетов с линией отрыва. Кнопка на билете сама подставляет тариф в форму брони и пересчитывает сумму. Отдельно продуманная версия для телефона." },
+  { cat: "Лендинги", title: "Лендинг студии маникюра «Пион»", tag: "сайт-визитка · editorial", img: "img/web-nails-1.jpg",
+    imgs: ["img/web-nails-1.jpg", "img/web-nails-2.jpg", "img/web-nails-3.jpg", "img/web-nails-4.jpg", "img/web-nails-5.jpg"],
+    demo: "https://185-125-100-224.sslip.io/nails-concept/", demoText: "▶ Открыть сайт",
+    desc: "Концепт сайта-визитки в журнальном стиле: крупная типографика, асимметричная вёрстка, изумрудно-бежевая палитра. Прайс-лист строками, как в журнале, блок о студии с фотографиями и форма записи с проверкой полей. Пример пакета «Эконом»: четыре блока, всё нужное и ничего лишнего." },
+  { cat: "Лендинги", title: "Сайт для кофейни (концепт)", tag: "лендинг · адаптив · анимация", img: "img/web-cafe-1.jpg",
+    imgs: ["img/web-cafe-1.jpg", "img/web-cafe-2.jpg", "img/web-cafe-3.jpg", "img/web-cafe-4.jpg"],
+    demo: "https://185-125-100-224.sslip.io/coffee-preview/", demoText: "▶ Открыть сайт",
+    desc: "Концепт нового сайта для саратовской кофейни-пекарни вместо шаблона на Тильде. Меню с поиском и вкладками подтягивается из Google Таблицы: сотрудники сами меняют цены, без программиста. Хлеб с карточками-фото и составом, винная карта с проверкой 18+, живой статус «открыто / закрыто» по часам работы, раздел второго заведения в его фирменном цвете, маршрут в одно нажатие. Анимации при прокрутке, отдельно продуманная версия для телефона. Сделано два варианта оформления — нежный и грубый — на одном содержимом." },
+  { cat: "Боты", title: "Бот-маскот для чата клана", tag: "telegram-бот · сервер 24/7", img: "img/mascot-farm.jpg",
+    imgs: ["img/mascot-farm.jpg", "img/mascot-live-1.jpg", "img/mascot-live-2.jpg", "img/mascot-attend.jpg"],
+    desc: "Живой кот-маскот игрового сообщества. Сам созывает на съёмки по расписанию, отвечает на «когда съёмки?», ведёт явку: берёт отметки из голосового канала Discord, админы проверяют их кнопками, и бот записывает их в Excel-таблицу, а потом сообщает о трёх пропусках подряд и поздравляет за серии. Для участников — фарм и рюкзак с приватными сообщениями, кормёжка и дружба, викторины, вопрос дня, цитатник, сезонные фразы и праздники, анонимные обращения к админам. Работает на своём сервере как служба, с автоперезапуском, ночными бэкапами и уведомлениями о сбоях. Ники участников размыты." },
+  { cat: "Боты", title: "Бот-анкета для сообщества", tag: "telegram-бот + mini app", img: "img/anketa-app-1.jpg",
+    imgs: ["img/anketa-app-1.jpg", "img/anketa-app-2.jpg", "img/anketa-admin.jpg"],
+    desc: "Вступление в клан через мини-приложение: человек читает правила по разделам (дальше не пустит, пока не дочитал), проходит проверочные вопросы и заполняет анкету с фото скина. Два маскота-помощника подсказывают по ходу. Готовая анкета приходит админам в отдельную тему: видно, сколько ошибок было в проверках. Под анкетой админы голосуют «Принять / Отклонить», а потом одной кнопкой отправляют кандидату личную ссылку-заявку в чат на 48 часов. Когда человек по ней стучится, бот спрашивает админов, впускать ли, и предупреждает, если ссылку переслали другому. Ответ админа доходит до человека через бота. Ники и данные кандидата размыты." },
+  { cat: "Боты", title: "Надёжный хостинг ботов", tag: "linux-сервер · защита от сбоев", img: "img/server-1.jpg",
+    imgs: ["img/server-1.jpg", "img/server-backup.jpg"],
+    desc: "Три бота сообщества (два Telegram и один Discord) переехали с домашнего ПК на VPS. Каждый работает как служба systemd и сам перезапускается при падении. Отдельный сторож каждые 5 минут проверяет, что боты живы и запущены ровно в одной копии, следит за диском и пишет владельцу в Telegram. Каждую ночь делается бэкап данных, он хранится 14 дней. Токены не попадают в логи." },
+  { cat: "Боты", title: "Этот бот-портфолио", tag: "telegram mini app", img: "img/miniapp.jpg",
+    desc: "Мини-приложение с услугами, работами, формой заявки и контактами. Заявка приходит прямо в Telegram, ответ уходит клиенту через бота." },
+  { cat: "Дизайн", title: "Логотип: енот-R", tag: "брендинг", img: "img/logo-raccoon-card.svg",
+    desc: "Знак для псевдонима REquinki: сидящий енот складывается в букву R, полосатый хвост становится её ногой. Рваный кистевой контур, вектор." },
+];
+
+const ABOUT = "REquinki — разработка сайтов и Telegram-ботов для бизнеса и сообществ. Работаю по согласованному ТЗ и срокам, показываю промежуточный результат. Домен и хостинг оформляются на заказчика, после сдачи помогаю с правками и поддержкой. Проекты в разделе «Работы» — реальные, боты из них работают прямо сейчас.";
+
+// лента под «keep your masks on»: [надпись, раздел из SERVICES]. Нажатие открывает заявку с этим разделом
+const TAPE = [
+  ["веб-дизайн", "Сайты"],
+  ["программирование", "Telegram"],
+  ["3D", "3D"],
+  ["дизайн", "Дизайн"],
+  ["монтаж", "Моушн и монтаж"],
+  ["автоматизация", "Автоматизация"],
+];
+
+// пустая ссылка = площадка ещё не готова, показывается «скоро»
+const LINKS = [
+  ["Kwork", "", "kwork"],
+  ["Behance", "", "behance"],
+  ["TikTok", "", "tiktok"],
+  ["ВКонтакте", "", "vk"],
+];
+
+/* ===================================================== */
+
+const tg = window.Telegram ? window.Telegram.WebApp : null;
+if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor("#020203"); tg.setBackgroundColor("#020203"); tg.BackButton.hide(); } catch (e) {} }
+const haptic = (t) => { try { tg && tg.HapticFeedback.selectionChanged(); } catch (e) {} };
+
+// --- заставка: глаз на весь экран → енот обрисовывается → уменьшается → ник → приложение. Тап — пропустить ---
+(async function intro() {
+  const body = document.body, hero = document.getElementById("hero");
+  const img = document.getElementById("logoImg"), splash = document.getElementById("splash");
+  const text = "REquinki", typed = document.getElementById("typed");
+  const NS = "http://www.w3.org/2000/svg";
+  const timers = [];
+  const later = (ms, f) => timers.push(setTimeout(f, ms));
+  let done = false, raf = 0;
+
+  function finish() {
+    if (done) return; done = true;
+    timers.forEach(clearTimeout); cancelAnimationFrame(raf);
+    typed.textContent = text;
+    typed.parentElement.classList.remove("busy");
+    body.classList.add("s4", "s5");
+    requestAnimationFrame(() => body.classList.remove("intro"));
+    setTimeout(() => splash.remove(), 500);
+    removeEventListener("pointerdown", finish);
+  }
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return finish();
+  addEventListener("pointerdown", finish);
+
+  // ждём картинку логотипа: пока она не загрузилась, у неё нулевая ширина и всё считается неправильно
+  try { await img.decode(); } catch (e) {}
+  if (!img.naturalWidth) await new Promise(r => { img.onload = img.onerror = r; setTimeout(r, 3000); });
+  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));   // Telegram успевает развернуть окно
+  if (done) return;
+  if (!img.getBoundingClientRect().width) return finish();
+
+  // шапку — в центр экрана (без анимации), и запоминаем, где окажется логотип
+  hero.style.transition = "none";
+  hero.style.transform = "none";
+  const h = hero.getBoundingClientRect();
+  hero.style.transform = "";
+  hero.style.setProperty("--dy", (innerHeight / 2 - (h.top + h.height / 2)) + "px");
+  const L = img.getBoundingClientRect();
+  requestAnimationFrame(() => hero.style.transition = "");
+
+  // берём векторный логотип и собираем из него большой слой
+  let src;
+  try { src = new DOMParser().parseFromString(await (await fetch(img.src)).text(), "image/svg+xml").documentElement; }
+  catch (e) { return finish(); }
+  if (done) return;
+  const [, , VW, VH] = src.getAttribute("viewBox").split(/\s+/).map(Number);
+  const W = innerWidth, H = innerHeight;
+  splash.innerHTML = `<svg xmlns="${NS}" preserveAspectRatio="none">
+    <defs>
+      <filter id="glow" x="-.5" y="-1.2" width="2" height="3.4"><feGaussianBlur id="gb" stdDeviation="0"/>
+        <feMerge result="halo"><feMergeNode/><feMergeNode/></feMerge>
+        <feGaussianBlur id="gb2" in="SourceGraphic" stdDeviation="0" result="core"/>
+        <feMerge><feMergeNode in="halo"/><feMergeNode in="core"/></feMerge></filter>
+      <mask id="mk" maskUnits="userSpaceOnUse" x="-5000" y="-5000" width="10000" height="10000">
+        <path id="wedge" fill="#fff"/></mask>
+    </defs>
+    <g id="body" mask="url(#mk)"></g><g id="eyeG" filter="url(#glow)" opacity="0"><g id="eyeIn"></g></g></svg>`;
+  const svg = splash.firstElementChild, $ = (id) => svg.querySelector("#" + id);
+  [...src.querySelectorAll("path")].forEach(p => {
+    // глаз — отдельный path с id="eye" (в старом логотипе — кусок рядом с точкой 52%, 22%)
+    const m = /translate\(([\d.]+),\s*([\d.]+)\)/.exec(p.getAttribute("transform") || "");
+    const isEye = p.id === "eye" || m && Math.abs(m[1] - VW * .5) < 40 && Math.abs(m[2] - VH * .216) < 30 && p.getAttribute("d").length < 5000;
+    $(isEye ? "eyeIn" : "body").appendChild(document.importNode(p, true));
+  });
+  let eb;
+  try { eb = $("eyeG").getBBox(); } catch (e) { return finish(); }
+  if (!eb.width || !L.width) return finish();          // что-то пошло не так — сразу показываем приложение
+  const ecx = eb.x + eb.width / 2, ecy = eb.y + eb.height / 2;
+
+  // кадры: f — сколько экранных пикселей в одной единице логотипа
+  const f0 = W * .8 / eb.width, f1 = L.width / VW;
+  const box = (f, ax, ay, sx, sy) => [ax - sx / f, ay - sy / f, W / f, H / f];   // точка (ax,ay) логотипа — в (sx,sy) экрана
+  const ease = (x) => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  const clamp = (x) => Math.max(0, Math.min(1, x));
+  const T0 = performance.now(), ZOOM = [2150, 3350], SWEEP = [1250, 2150];
+  let glowFade = null;   // когда начнёт гаснуть свечение (время s4)
+
+  function frame(now) {
+    const t = now - T0;
+    // масштаб: плавно в логарифме, чтобы уменьшение шло равномерно
+    const z = ease(clamp((t - ZOOM[0]) / (ZOOM[1] - ZOOM[0])));
+    const f = Math.exp(Math.log(f0) + (Math.log(f1) - Math.log(f0)) * z);
+    // глаз всё время на экране: его экранная точка едет из центра туда, где он будет в шапке
+    const sx = W / 2 + (L.left + ecx * f1 - W / 2) * z, sy0 = H / 2 + (L.top + ecy * f1 - H / 2) * z;
+    svg.setAttribute("viewBox", box(f, ecx, ecy, sx, sy0).join(" "));
+    // глаз: появляется, моргает, светится; гаснет, пока печатается ник
+    $("eyeG").setAttribute("opacity", clamp(t / 500));
+    // моргает дважды, как спросонья: в 0,7 и 1,1 с
+    const blink = (at) => Math.sin(Math.PI * clamp((t - at) / 240));
+    const sy = 1 - .92 * Math.max(blink(700), blink(1100));
+    $("eyeIn").setAttribute("transform", `translate(${ecx} ${ecy}) scale(1 ${sy}) translate(${-ecx} ${-ecy})`);
+    const g = glowFade === null ? 22 : 22 * (1 - clamp((now - glowFade) / 1600));
+    $("gb").setAttribute("stdDeviation", (g / f).toFixed(3));
+    $("gb2").setAttribute("stdDeviation", (0.5 / f).toFixed(3));   // чуть смягчает край глаза при сильном увеличении
+    // обводка енота — сектором по кругу от глаза
+    const a = 2 * Math.PI * ease(clamp((t - SWEEP[0]) / (SWEEP[1] - SWEEP[0]))), R = 4000, a0 = -Math.PI * .9;
+    if (a >= 2 * Math.PI - 1e-3) $("body").removeAttribute("mask");   // обводка готова — маска больше не нужна
+    else if (a > 0) $("wedge").setAttribute("d",
+      `M${ecx} ${ecy}L${ecx + R * Math.cos(a0)} ${ecy + R * Math.sin(a0)}` +
+      `A${R} ${R} 0 ${a > Math.PI ? 1 : 0} 1 ${ecx + R * Math.cos(a0 + a)} ${ecy + R * Math.sin(a0 + a)}Z`);
+    if (!done) raf = requestAnimationFrame(frame);
+  }
+  raf = requestAnimationFrame(frame);
+
+  later(3450, () => {                                         // ник
+    body.classList.add("s4");
+    glowFade = performance.now();
+    typed.parentElement.classList.add("busy");
+    let i = 0;
+    later(300, function step() {
+      typed.textContent = text.slice(0, ++i);
+      if (i < text.length) later(110 + Math.random() * 100, step);   // неровный темп, как живой человек
+      else {
+        typed.parentElement.classList.remove("busy");
+        later(300, () => body.classList.add("s5"));           // подпись и «маска»
+        later(1200, finish);                                  // приложение
+      }
+    });
+  });
+})();
+
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+// услуги
+// «своя задача» в каждом разделе: для нестандартных просьб, которых нет в прайсе
+const CUSTOM = "Своя задача в этом разделе";
+const CUSTOM_HINT = "Нужно что-то, чего нет в прайсе? Опишите идею — отвечу, возьмусь ли и сколько это будет стоить";
+// «от 3 000 ₽» для заголовка раздела: самая первая цена в рублях
+const fromPrice = (g) => { for (const [, p] of g.items) { const m = /\d[\d\s]*₽/.exec(p); if (m) return "от " + m[0]; } return "договорная"; };
+document.getElementById("services").innerHTML = SERVICES.map((g, gi) => `
+  <div class="card svc" id="svc-${gi}">
+    <button class="svc-head" onclick="toggleSvc(${gi})"><span class="arr">›</span>${esc(g.group)}<span class="from">${esc(fromPrice(g))}</span></button>
+    <div class="svc-body">
+      <span class="chip">${esc(g.chip)}</span>
+      <p style="margin:8px 0 12px">${esc(g.desc)}</p>
+      ${g.items.map(([n, p], ii) => `<div class="row" onclick="pickService(${gi}, ${ii})"><span>${esc(n)}</span><span class="price">${esc(p)}</span></div>`).join("")}
+      <div class="row" onclick="pickService(${gi}, -1)"><span>✨ ${CUSTOM}</span><span class="price">по договорённости</span></div>
+    </div>
+  </div>`).join("");
+function toggleSvc(gi) { haptic(); document.getElementById("svc-" + gi).classList.toggle("open"); }
+
+// выбор в форме
+const sel = document.getElementById("f-service");
+sel.innerHTML = SERVICES.map(g => `<optgroup label="${esc(g.group)}">` +
+    g.items.map(([n, , hint]) => `<option value="${esc(g.group)}: ${esc(n)}" data-hint="${esc(hint || "")}">${esc(n)}</option>`).join("") +
+    `<option value="${esc(g.group)}: ${CUSTOM.toLowerCase()}" data-hint="${CUSTOM_HINT}">✨ ${CUSTOM}</option>` +
+  `</optgroup>`).join("")
+  + `<option value="Другое" data-hint="Расскажите, что нужно, своими словами">Другое</option>`;
+// подсказка в поле «Опишите задачу» зависит от выбранной услуги
+const task = document.getElementById("f-task");
+function updateHint() { const o = sel.options[sel.selectedIndex]; task.placeholder = (o && o.dataset.hint) || ""; }
+sel.addEventListener("change", updateHint); updateHint();
+
+// выбрать услугу и перейти в заявку (из ленты — первая услуга раздела)
+function pickService(gi, ii = 0) {
+  const g = SERVICES[gi]; if (!g) return;
+  sel.value = `${g.group}: ${ii < 0 ? CUSTOM.toLowerCase() : g.items[ii][0]}`; updateHint();
+  go("order");
+  sel.classList.remove("flash"); void sel.offsetWidth; sel.classList.add("flash");
+}
+const tapeBtns = TAPE.map(([label, group]) => {
+  const gi = SERVICES.findIndex(g => g.group === group);
+  return gi < 0 ? "" : `<button onclick="pickService(${gi})">${esc(label)}</button>`;
+}).join("");
+document.getElementById("tapeTrack").innerHTML = tapeBtns + tapeBtns;   // две копии — лента едет без шва
+const tapeEl = document.getElementById("tape");
+tapeEl.addEventListener("touchstart", () => tapeEl.classList.add("hold"), { passive: true });
+tapeEl.addEventListener("touchend", () => setTimeout(() => tapeEl.classList.remove("hold"), 600));
+
+// портфолио
+function media(w, big) {
+  if (big && w.imgs) return `<div class="gal">${w.imgs.map(u => `<img src="${esc(u)}" alt="" loading="lazy">`).join("")}</div><div class="gal-hint">листайте →</div>`;
+  if (w.video) return `<video src="${esc(w.video)}" ${big ? "controls autoplay" : "muted autoplay loop"} playsinline></video>`;
+  if (w.img) return `<img src="${esc(w.img)}" alt="" loading="lazy">`;
+  return `<div class="ph">// скоро<br>${esc(w.tag)}</div>`;
+}
+const CATS = [...new Set(WORKS.map(w => w.cat))];
+let curCat = CATS[0];
+function renderWorks() {
+  document.getElementById("cats").innerHTML = CATS.map(c =>
+    `<button type="button" class="${c === curCat ? "on" : ""}" onclick="pickCat('${esc(c)}')">${esc(c)}</button>`).join("");
+  document.getElementById("works").innerHTML = WORKS.map((w, i) => w.cat !== curCat ? "" : `
+  <div class="work" onclick="openWork(${i})">
+    <div class="thumb">${media(w, false)}${w.demo ? `<span class="demo-badge">▶ демо</span>` : ""}</div>
+    <div class="cap">${esc(w.title)}<small>${esc(w.tag)}</small></div>
+  </div>`).join("");
+}
+function pickCat(c) { haptic(); curCat = c; renderWorks(); }
+renderWorks();
+function openWork(i) {
+  const w = WORKS[i]; haptic();
+  document.getElementById("m-media").innerHTML = (w.imgs || w.img || w.video) ? media(w, true) : "";
+  document.getElementById("m-title").textContent = w.title;
+  document.getElementById("m-desc").textContent = w.desc;
+  const d = document.getElementById("m-demo");
+  d.style.display = w.demo ? "block" : "none";
+  d.textContent = w.demoText || "▶ Попробовать демо";
+  d.onclick = () => { if (/^https?:/.test(w.demo) && tg) tg.openLink(w.demo); else location.href = w.demo; };
+  document.getElementById("modal").classList.add("on");
+}
+function closeWork() { document.getElementById("modal").classList.remove("on"); document.getElementById("m-media").innerHTML = ""; }
+
+// обо мне
+document.getElementById("about").innerHTML = `<p style="color:var(--text)">${esc(ABOUT)}</p>`;
+document.getElementById("links").innerHTML = LINKS.map(([n, u, s]) => u
+  ? `<a href="${esc(u)}" onclick="return openLink(this.href)">${esc(n)}<span>${esc(s)} ↗</span></a>`
+  : `<a class="off">${esc(n)}<span>// скоро</span></a>`).join("")
+  + (LINKS.some(l => !l[1]) ? `<p class="note">Страницы на площадках сейчас оформляются, список будет дополняться. Пока проще всего написать прямо в этот чат или оставить заявку.</p>` : "");
+function openLink(u) { if (tg && tg.openLink) { tg.openLink(u); return false; } return true; }
+
+// вкладки
+function go(tab) {
+  haptic();
+  document.querySelectorAll("section").forEach(s => s.classList.toggle("on", s.id === "s-" + tab));
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.tab === tab));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+if (location.hash.length > 1) go(location.hash.slice(1));
+
+// заявка
+function sendOrder() {
+  const err = document.getElementById("f-err");
+  const data = {
+    service: sel.value,
+    task: document.getElementById("f-task").value.trim(),
+    budget: document.getElementById("f-budget").value.trim(),
+    deadline: document.getElementById("f-deadline").value.trim(),
+  };
+  if (data.task.length < 10) { err.textContent = "Опишите задачу хотя бы парой предложений."; return; }
+  err.textContent = "";
+
+  // sendData работает, только если приложение открыто кнопкой под полем ввода в чате с ботом
+  const viaKeyboard = tg && tg.initData !== undefined && !(tg.initDataUnsafe && tg.initDataUnsafe.query_id) && tg.platform !== "unknown";
+  if (viaKeyboard) {
+    try { tg.HapticFeedback.notificationOccurred("success"); } catch (e) {}
+    tg.sendData(JSON.stringify(data));   // Telegram закроет приложение сам
+    return;
+  }
+  if (tg && tg.platform !== "unknown") {
+    err.textContent = "Откройте приложение кнопкой «✨ Открыть» внизу чата с ботом, тогда заявка дойдёт.";
+    return;
+  }
+  // открыто в обычном браузере — просто показываем, как это выглядит
+  document.getElementById("order-form").style.display = "none";
+  document.getElementById("order-done").style.display = "block";
+}
+</script>
+<script src="passport.js?v=1"></script>
+</body>
+</html>
