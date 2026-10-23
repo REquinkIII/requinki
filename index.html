@@ -302,6 +302,8 @@
 
   .foot { text-align: center; margin-top: 30px; }
 </style>
+<link rel="stylesheet" href="fonts/fonts.css?v=1">
+<link rel="stylesheet" href="passport.css?v=3">
 </head>
 <body class="intro">
 <div class="splash" id="splash"></div>
@@ -501,7 +503,7 @@ const TAPE = [
 
 // пустая ссылка = площадка ещё не готова, показывается «скоро»
 const LINKS = [
-  ["Kwork", "", "kwork"],
+  ["Kwork", "https://kwork.ru/user/requinkiii", "kwork"],
   ["Behance", "", "behance"],
   ["TikTok", "", "tiktok"],
   ["ВКонтакте", "", "vk"],
@@ -760,5 +762,6 @@ function sendOrder() {
   document.getElementById("order-done").style.display = "block";
 }
 </script>
+<script src="passport.js?v=1"></script>
 </body>
 </html>
