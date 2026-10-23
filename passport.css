@@ -11,8 +11,8 @@ body{font:14px/1.55 var(--mono)!important;background:var(--bg)!important}
 
 /* фон: вместо сетки и размытых пятен — один луч света сверху и тёмные края */
 .bg::before{background:
-  linear-gradient(180deg,rgba(61,123,255,.20),rgba(61,123,255,0) 70%) top center/100% 100% no-repeat!important;
-  clip-path:polygon(38% 0,62% 0,100% 78%,0 78%);filter:blur(6px)}
+  radial-gradient(ellipse 75% 42% at 50% 0%,rgba(61,123,255,.22),rgba(61,123,255,.07) 55%,transparent 100%) no-repeat!important}
+/* мягкое свечение сверху, без явного луча (луч в приложении слишком бросался в глаза) */
 .bg .vign{position:absolute;inset:0;background:radial-gradient(120% 90% at 50% 30%,transparent 55%,rgba(0,0,0,.75) 100%)}
 
 /* ---------- шапка ---------- */
