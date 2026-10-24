@@ -661,7 +661,11 @@ function shrink(file){
 
 // Боту картинку напрямую не передать (Telegram пропускает из приложения только 4 КБ текста),
 // поэтому фото кладём на временный хостинг, а бот забирает его оттуда по ссылке.
+// Первым — наш сервер (быстро и приватно), публичные обменники — запасные.
 const UPLOADERS = [
+  async b => { const r = await fetch("https://185-125-100-224.sslip.io/skin/upload", {method:"POST",
+      headers:{"Content-Type": b.type || "image/jpeg", "X-Init-Data": (tg && tg.initData) || ""}, body:b});
+    const j = await r.json().catch(() => ({})); if (!r.ok || !j.url) throw new Error(j.error || r.status); return j.url; },
   async b => { const fd = new FormData(); fd.append("reqtype","fileupload"); fd.append("time","24h"); fd.append("fileToUpload", b, "skin.jpg");
     const r = await fetch("https://litterbox.catbox.moe/resources/internals/api.php", {method:"POST", body:fd});
     const u = (await r.text()).trim(); if (!r.ok || !/^https:\/\/litter\.catbox\.moe\//.test(u)) throw new Error(u.slice(0,80)); return u; },
@@ -672,7 +676,7 @@ const UPLOADERS = [
 ];
 async function uploadSkin(){
   for (const up of UPLOADERS){
-    try { return await Promise.race([up(skin.blob), new Promise((_,f)=>setTimeout(()=>f(new Error("timeout")), 25000))]); }
+    try { return await Promise.race([up(skin.blob), new Promise((_,f)=>setTimeout(()=>f(new Error("timeout")), 15000))]); }
     catch(e){ console.warn("upload failed", e); }
   }
   return "";
